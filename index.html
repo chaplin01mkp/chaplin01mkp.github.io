@@ -1,0 +1,206 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#080808" />
+    <meta name="description" content="CHAPLIN Finance OS — закрытие смены" />
+    <title>CHAPLIN — Закрытие смены</title>
+    <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="shell" id="form-screen">
+      <header class="brand">
+        <div class="monogram">C</div>
+        <div>
+          <p class="eyebrow">CHAPLIN FINANCE OS</p>
+          <h1>Закрытие смены</h1>
+          <p class="subtitle">Daily Closing · заполняется отдельно по каждому филиалу</p>
+        </div>
+      </header>
+
+      <div class="notice">
+        <span class="notice-dot"></span>
+        Отправка попадёт в действующую финансовую таблицу CHAPLIN
+      </div>
+
+      <form id="closing-form">
+        <section class="form-section">
+          <div class="section-heading">
+            <span>01</span>
+            <div><h2>Смена</h2><p>Shift details</p></div>
+          </div>
+          <div class="field-grid">
+            <label class="field">
+              <span class="field-label">Дата закрытия<b>*</b></span>
+              <span class="field-english">Closing date</span>
+              <input id="closing-date" type="date" required />
+            </label>
+
+            <div class="field">
+              <span class="field-label">Филиал<b>*</b></span>
+              <span class="field-english">Branch</span>
+              <div class="segmented" id="branch-options">
+                <button type="button" data-value="Димитрова">Димитрова</button>
+                <button type="button" data-value="Пролетарская">Пролетарская</button>
+              </div>
+              <input id="branch" class="hidden-required" required tabindex="-1" />
+            </div>
+
+            <label class="field">
+              <span class="field-label">Кто выполнял обязанности администратора?<b>*</b></span>
+              <span class="field-english">Acting administrator</span>
+              <select id="administrator" required>
+                <option value="">Выберите сотрудника</option>
+                <option>Александр</option>
+                <option>Бэлла</option>
+                <option>Валерия</option>
+                <option>Вероника</option>
+                <option>Виталий</option>
+                <option>Денис</option>
+                <option>Дмитрий</option>
+                <option>Мартин</option>
+                <option>Олег</option>
+                <option>Ольга</option>
+                <option>Полина</option>
+                <option>Светлана</option>
+                <option>Другой</option>
+              </select>
+              <input id="other-administrator" class="follow-up-input is-hidden" type="text" placeholder="Укажите имя сотрудника" />
+            </label>
+
+            <label class="field">
+              <span class="field-label">Тип администратора<b>*</b></span>
+              <span class="field-english">Admin coverage</span>
+              <select id="admin-type" required>
+                <option value="">Выберите вариант</option>
+                <option>Штатный администратор</option>
+                <option>Барбер на подмене</option>
+              </select>
+            </label>
+          </div>
+        </section>
+
+        <section class="form-section">
+          <div class="section-heading">
+            <span>02</span>
+            <div><h2>Выручка</h2><p>Revenue</p></div>
+          </div>
+          <div class="field-grid">
+            <label class="field amount-field"><span class="field-label">Выручка услуг<b>*</b></span><span class="field-english">Amount, RUB</span><span class="amount-wrap"><input id="services" type="number" min="0" step="0.01" value="0" required /><i>₽</i></span></label>
+            <label class="field amount-field"><span class="field-label">Продажа косметики<b>*</b></span><span class="field-english">Amount, RUB</span><span class="amount-wrap"><input id="retail" type="number" min="0" step="0.01" value="0" required /><i>₽</i></span></label>
+            <label class="field amount-field"><span class="field-label">Напитки<b>*</b></span><span class="field-english">Amount, RUB</span><span class="amount-wrap"><input id="beverages" type="number" min="0" step="0.01" value="0" required /><i>₽</i></span></label>
+            <label class="field amount-field"><span class="field-label">Чаевые всего<b>*</b></span><span class="field-english">Amount, RUB</span><span class="amount-wrap"><input id="tips" type="number" min="0" step="0.01" value="0" required /><i>₽</i></span></label>
+            <label class="field amount-field"><span class="field-label">Наличные от клиентов<b>*</b></span><span class="field-english">Amount, RUB</span><span class="amount-wrap"><input id="cash" type="number" min="0" step="0.01" value="0" required /><i>₽</i></span></label>
+            <label class="field amount-field"><span class="field-label">Переводы клиентов мастерам<b>*</b></span><span class="field-english">Amount, RUB</span><span class="amount-wrap"><input id="client-transfers" type="number" min="0" step="0.01" value="0" required /><i>₽</i></span></label>
+            <label class="field amount-field"><span class="field-label">Всего переведено на карты<b>*</b></span><span class="field-english">Amount, RUB</span><span class="amount-wrap"><input id="total-transferred" type="number" min="0" step="0.01" value="0" required /><i>₽</i></span></label>
+
+            <div class="field">
+              <span class="field-label">На какие карты перевели?<b>*</b></span>
+              <span class="field-english">Collection accounts</span>
+              <div class="chips" id="cards">
+                <button class="chip" type="button" data-value="Ozon Света"><span>+</span>Ozon Света</button>
+                <button class="chip" type="button" data-value="Ozon Тамара"><span>+</span>Ozon Тамара</button>
+                <button class="chip" type="button" data-value="T-Банк Сайда"><span>+</span>T-Банк Сайда</button>
+                <button class="chip" type="button" data-value="Ozon Вероника"><span>+</span>Ozon Вероника</button>
+                <button class="chip" type="button" data-value="Ozon Анзаур"><span>+</span>Ozon Анзаур</button>
+                <button class="chip" type="button" data-value="Другая карта / Other account"><span>+</span>Другая карта / Other account</button>
+              </div>
+              <p id="cards-hint" class="field-hint is-hidden">Выберите минимум одну карту</p>
+            </div>
+
+            <label class="field">
+              <span class="field-label">Разбивка: карта — сумма — назначение<b>*</b></span>
+              <span class="field-english">Card split &amp; purpose</span>
+              <input id="card-split" type="text" placeholder="Например: Ozon Света — 8 500 — свет" required />
+            </label>
+            <label class="field amount-field"><span class="field-label">Чаевые переводом<b>*</b></span><span class="field-english">Amount, RUB</span><span class="amount-wrap"><input id="tips-transfer" type="number" min="0" step="0.01" value="0" required /><i>₽</i></span></label>
+            <label class="field amount-field"><span class="field-label">Другие поступления бизнеса<b>*</b></span><span class="field-english">Amount, RUB</span><span class="amount-wrap"><input id="other-receipts" type="number" min="0" step="0.01" value="0" required /><i>₽</i></span></label>
+          </div>
+        </section>
+
+        <section class="form-section">
+          <div class="section-heading">
+            <span>03</span>
+            <div><h2>Выплаты</h2><p>Payroll</p></div>
+          </div>
+          <div class="field-grid">
+            <label class="field amount-field"><span class="field-label">Общая ЗП мастеров за смену<b>*</b></span><span class="field-english">Amount, RUB</span><span class="amount-wrap"><input id="barber-payroll" type="number" min="0" step="0.01" value="0" required /><i>₽</i></span></label>
+            <label class="field amount-field"><span class="field-label">Фактическая выплата за админские обязанности<b>*</b></span><span class="field-english">Amount, RUB</span><span class="amount-wrap"><input id="admin-payment" type="number" min="0" step="0.01" value="0" required /><i>₽</i></span></label>
+            <label id="manager-field" class="field amount-field is-hidden"><span class="field-label">Доплата Светлане как управляющей<b>*</b></span><span class="field-english">Amount, RUB</span><span class="amount-wrap"><input id="manager-payment" type="number" min="0" step="0.01" value="0" /><i>₽</i></span></label>
+          </div>
+        </section>
+
+        <section class="form-section">
+          <div class="section-heading">
+            <span>04</span>
+            <div><h2>Расходы и остаток</h2><p>Expenses &amp; balance</p></div>
+          </div>
+          <div class="field-grid">
+            <label class="field amount-field"><span class="field-label">Уборка<b>*</b></span><span class="field-english">Amount, RUB</span><span class="amount-wrap"><input id="cleaning" type="number" min="0" step="0.01" value="0" required /><i>₽</i></span></label>
+            <label class="field amount-field"><span class="field-label">Расходы, возникшие сегодня (кроме уборки)<b>*</b></span><span class="field-english">Amount, RUB</span><span class="amount-wrap"><input id="expenses-incurred" type="number" min="0" step="0.01" value="0" required /><i>₽</i></span></label>
+            <label class="field amount-field"><span class="field-label">Фактически оплачено по новым расходам (включая уборку)<b>*</b></span><span class="field-english">Amount, RUB</span><span class="amount-wrap"><input id="new-expenses-paid" type="number" min="0" step="0.01" value="0" required /><i>₽</i></span></label>
+            <label class="field amount-field"><span class="field-label">Осталось оплатить позже (включая уборку)<b>*</b></span><span class="field-english">Amount, RUB</span><span class="amount-wrap"><input id="new-payable" type="number" min="0" step="0.01" value="0" required /><i>₽</i></span></label>
+
+            <label class="field">
+              <span class="field-label">Кому и за что должны</span>
+              <span class="field-english">Payable details · optional</span>
+              <textarea id="payable-details" rows="3" placeholder="Если долга нет — оставьте пустым"></textarea>
+            </label>
+            <label class="field amount-field"><span class="field-label">Оплачено сегодня по старым долгам<b>*</b></span><span class="field-english">Amount, RUB</span><span class="amount-wrap"><input id="prior-payable-paid" type="number" min="0" step="0.01" value="0" required /><i>₽</i></span></label>
+
+            <label class="field">
+              <span class="field-label">Источник оплаты старого долга<b>*</b></span>
+              <span class="field-english">Payment source</span>
+              <select id="prior-payable-source" required>
+                <option>Не было</option>
+                <option>Наличные</option>
+                <option>Ozon Света</option>
+                <option>Ozon Анзаур</option>
+                <option>Ozon Тамара</option>
+                <option>T-Банк Сайда</option>
+                <option>Ozon Вероника</option>
+                <option>Другая карта</option>
+              </select>
+            </label>
+            <label class="field amount-field"><span class="field-label">Остаток наличных<b>*</b></span><span class="field-english">Amount, RUB</span><span class="amount-wrap"><input id="cash-balance" type="number" min="0" step="0.01" value="0" required /><i>₽</i></span></label>
+
+            <label class="field">
+              <span class="field-label">Комментарий</span>
+              <span class="field-english">Comment · optional</span>
+              <textarea id="comment" rows="4" placeholder="Важные пояснения по смене"></textarea>
+            </label>
+            <label class="field">
+              <span class="field-label">Email для копии отчёта<b>*</b></span>
+              <span class="field-english">Report receipt email</span>
+              <input id="email" type="email" inputmode="email" autocomplete="email" placeholder="name@example.com" required />
+            </label>
+          </div>
+        </section>
+
+        <div id="error-message" class="error-message is-hidden">Отчёт не сохранился. Проверьте интернет и попробуйте ещё раз.</div>
+        <button id="submit-button" class="primary-button submit-button" type="submit">Отправить отчёт</button>
+        <p class="submit-note">После отправки появится готовый текст для WhatsApp</p>
+      </form>
+    </main>
+
+    <main class="shell success-shell is-hidden" id="success-screen">
+      <header class="brand compact">
+        <div class="monogram">C</div>
+        <div><p class="eyebrow">CHAPLIN FINANCE OS</p><h1>Отчёт принят</h1></div>
+        <div class="success-mark" aria-label="Успешно">✓</div>
+      </header>
+      <section class="success-card">
+        <div class="success-title"><span class="status-dot"></span>Данные сохранены</div>
+        <p>Копия ответов отправлена на <strong id="submitted-email"></strong>. Ниже — готовый текст для группы WhatsApp.</p>
+        <pre class="report-preview" id="report-preview"></pre>
+        <button class="primary-button" id="copy-button" type="button">Скопировать отчёт</button>
+        <button class="secondary-button" id="reset-button" type="button">Заполнить новый отчёт</button>
+      </section>
+    </main>
+
+    <iframe id="google-form-target" name="google-form-target" title="Отправка формы"></iframe>
+    <script src="app.js"></script>
+  </body>
+</html>
