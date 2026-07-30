@@ -41,8 +41,8 @@ const reportLabels = {
   tips: "Чаевые всего",
   cash: "Наличные от клиентов",
   clientTransfers: "Переводы клиентов мастерам",
-  totalTransferred: "Переведено на карты",
-  cards: "Карты",
+  totalTransferred: "Мастера перевели бизнесу",
+  cards: "Карты бизнеса",
   cardSplit: "Разбивка по картам",
   tipsTransfer: "Чаевые переводом",
   otherReceipts: "Другие поступления",
@@ -51,10 +51,12 @@ const reportLabels = {
   managerPayment: "Выплата Светлане",
   cleaning: "Уборка",
   expensesIncurred: "Расходы возникли сегодня",
+  expenseDetails: "На что потрачено",
   newExpensesPaid: "Новые расходы оплачены сегодня",
   newPayable: "Осталось оплатить позже",
   payableDetails: "Кому и за что должны",
   priorPayablePaid: "Оплачено по старым долгам",
+  priorPayableDetails: "Кому и за какой старый долг",
   priorPayableSource: "Источник оплаты старого долга",
   cashBalance: "Остаток наличных",
   comment: "Комментарий",
@@ -74,6 +76,13 @@ const administrator = document.getElementById("administrator");
 const otherAdministrator = document.getElementById("other-administrator");
 const managerField = document.getElementById("manager-field");
 const managerPayment = document.getElementById("manager-payment");
+const expensesIncurred = document.getElementById("expenses-incurred");
+const expenseDetails = document.getElementById("expense-details");
+const newPayable = document.getElementById("new-payable");
+const payableDetails = document.getElementById("payable-details");
+const priorPayablePaid = document.getElementById("prior-payable-paid");
+const priorPayableDetails = document.getElementById("prior-payable-details");
+const priorPayableSource = document.getElementById("prior-payable-source");
 const cardsHint = document.getElementById("cards-hint");
 const submitButton = document.getElementById("submit-button");
 const errorMessage = document.getElementById("error-message");
@@ -120,6 +129,36 @@ administrator.addEventListener("change", () => {
   if (!isSvetlana) managerPayment.value = "0";
 });
 
+function isPositive(value) {
+  return Number(String(value).replace(",", ".")) > 0;
+}
+
+function syncConditionalRequirements() {
+  const needsExpenseDetails = isPositive(expensesIncurred.value);
+  const needsPayableDetails = isPositive(newPayable.value);
+  const needsPriorPayableDetails = isPositive(priorPayablePaid.value);
+
+  expenseDetails.required = needsExpenseDetails;
+  payableDetails.required = needsPayableDetails;
+  priorPayableDetails.required = needsPriorPayableDetails;
+
+  document.getElementById("expense-details-required").classList.toggle("is-hidden", !needsExpenseDetails);
+  document.getElementById("payable-details-required").classList.toggle("is-hidden", !needsPayableDetails);
+  document.getElementById("prior-payable-details-required").classList.toggle("is-hidden", !needsPriorPayableDetails);
+
+  priorPayableSource.setCustomValidity(
+    needsPriorPayableDetails && priorPayableSource.value === "Не было"
+      ? "Выберите, откуда оплатили старый долг"
+      : ""
+  );
+}
+
+[expensesIncurred, newPayable, priorPayablePaid].forEach((input) => {
+  input.addEventListener("input", syncConditionalRequirements);
+});
+priorPayableSource.addEventListener("change", syncConditionalRequirements);
+syncConditionalRequirements();
+
 function getAnswers() {
   const answers = {};
   for (const [key, [elementId]] of Object.entries(fieldMap)) {
@@ -131,8 +170,19 @@ function getAnswers() {
     : administrator.value;
   answers.cards = [...selectedCards];
   answers.email = document.getElementById("email").value.trim();
+  answers.expenseDetails = expenseDetails.value.trim();
+  answers.priorPayableDetails = priorPayableDetails.value.trim();
   if (answers.administrator !== "Светлана") answers.managerPayment = "0";
   return answers;
+}
+
+function buildStructuredComment(answers) {
+  return [
+    `Расходы: ${answers.expenseDetails || "—"}`,
+    `Старый долг: ${answers.priorPayableDetails || "—"}`,
+    `Комментарий: ${answers.comment || "—"}`,
+    `Email: ${answers.email || "—"}`,
+  ].join("\n");
 }
 
 function addHiddenInput(form, name, value) {
@@ -156,11 +206,11 @@ function sendToGoogle(answers) {
   addHiddenInput(transport, "entry.1115287526_day", String(Number(day)));
 
   for (const [key, [, entryId]] of Object.entries(fieldMap)) {
-    addHiddenInput(transport, `entry.${entryId}`, answers[key]);
+    const value = key === "comment" ? buildStructuredComment(answers) : answers[key];
+    addHiddenInput(transport, `entry.${entryId}`, value);
   }
   answers.cards.forEach((card) => addHiddenInput(transport, "entry.69256334", card));
   addHiddenInput(transport, "entry.1591994395", answers.administrator === "Светлана" ? "Да" : "Нет");
-  addHiddenInput(transport, "emailAddress", answers.email);
   addHiddenInput(transport, "fvv", "1");
   addHiddenInput(transport, "pageHistory", "0");
   addHiddenInput(transport, "submissionTimestamp", "-1");
@@ -175,6 +225,7 @@ closingForm.addEventListener("submit", (event) => {
   event.preventDefault();
   errorMessage.classList.add("is-hidden");
 
+  syncConditionalRequirements();
   if (!closingForm.reportValidity()) return;
   if (selectedCards.length === 0) {
     cardsHint.classList.remove("is-hidden");
@@ -213,7 +264,6 @@ function buildReport(answers) {
 }
 
 function showSuccess(answers) {
-  document.getElementById("submitted-email").textContent = answers.email;
   document.getElementById("report-preview").textContent = buildReport(answers);
   formScreen.classList.add("is-hidden");
   successScreen.classList.remove("is-hidden");
