@@ -94,10 +94,10 @@
             <label class="field amount-field"><span class="field-label">Чаевые всего<b>*</b></span><span class="field-english">Amount, RUB</span><span class="amount-wrap"><input id="tips" type="number" min="0" step="0.01" value="0" required /><i>₽</i></span></label>
             <label class="field amount-field"><span class="field-label">Наличные от клиентов<b>*</b></span><span class="field-english">Amount, RUB</span><span class="amount-wrap"><input id="cash" type="number" min="0" step="0.01" value="0" required /><i>₽</i></span></label>
             <label class="field amount-field"><span class="field-label">Переводы клиентов мастерам<b>*</b></span><span class="field-english">Amount, RUB</span><span class="amount-wrap"><input id="client-transfers" type="number" min="0" step="0.01" value="0" required /><i>₽</i></span></label>
-            <label class="field amount-field"><span class="field-label">Всего переведено на карты<b>*</b></span><span class="field-english">Amount, RUB</span><span class="amount-wrap"><input id="total-transferred" type="number" min="0" step="0.01" value="0" required /><i>₽</i></span></label>
+            <label class="field amount-field"><span class="field-label">Сколько мастера перевели бизнесу в конце смены<b>*</b></span><span class="field-english">После удержания своей доли · Amount, RUB</span><span class="amount-wrap"><input id="total-transferred" type="number" min="0" step="0.01" value="0" required /><i>₽</i></span></label>
 
             <div class="field">
-              <span class="field-label">На какие карты перевели?<b>*</b></span>
+              <span class="field-label">На какие карты бизнеса перевели?<b>*</b></span>
               <span class="field-english">Collection accounts</span>
               <div class="chips" id="cards">
                 <button class="chip" type="button" data-value="Ozon Света"><span>+</span>Ozon Света</button>
@@ -140,15 +140,25 @@
           <div class="field-grid">
             <label class="field amount-field"><span class="field-label">Уборка<b>*</b></span><span class="field-english">Amount, RUB</span><span class="amount-wrap"><input id="cleaning" type="number" min="0" step="0.01" value="0" required /><i>₽</i></span></label>
             <label class="field amount-field"><span class="field-label">Расходы, возникшие сегодня (кроме уборки)<b>*</b></span><span class="field-english">Amount, RUB</span><span class="amount-wrap"><input id="expenses-incurred" type="number" min="0" step="0.01" value="0" required /><i>₽</i></span></label>
+            <label class="field">
+              <span class="field-label">На что потрачено?<b id="expense-details-required" class="is-hidden">*</b></span>
+              <span class="field-english">Обязательно, если расходы больше 0</span>
+              <textarea id="expense-details" rows="3" placeholder="Например: вода — 500; лампочки — 1 200"></textarea>
+            </label>
             <label class="field amount-field"><span class="field-label">Фактически оплачено по новым расходам (включая уборку)<b>*</b></span><span class="field-english">Amount, RUB</span><span class="amount-wrap"><input id="new-expenses-paid" type="number" min="0" step="0.01" value="0" required /><i>₽</i></span></label>
             <label class="field amount-field"><span class="field-label">Осталось оплатить позже (включая уборку)<b>*</b></span><span class="field-english">Amount, RUB</span><span class="amount-wrap"><input id="new-payable" type="number" min="0" step="0.01" value="0" required /><i>₽</i></span></label>
 
             <label class="field">
-              <span class="field-label">Кому и за что должны</span>
-              <span class="field-english">Payable details · optional</span>
+              <span class="field-label">Кому и за что должны<b id="payable-details-required" class="is-hidden">*</b></span>
+              <span class="field-english">Обязательно, если осталось оплатить позже</span>
               <textarea id="payable-details" rows="3" placeholder="Если долга нет — оставьте пустым"></textarea>
             </label>
             <label class="field amount-field"><span class="field-label">Оплачено сегодня по старым долгам<b>*</b></span><span class="field-english">Amount, RUB</span><span class="amount-wrap"><input id="prior-payable-paid" type="number" min="0" step="0.01" value="0" required /><i>₽</i></span></label>
+            <label class="field">
+              <span class="field-label">Кому и за какой старый долг заплатили?<b id="prior-payable-details-required" class="is-hidden">*</b></span>
+              <span class="field-english">Обязательно, если оплачено больше 0</span>
+              <textarea id="prior-payable-details" rows="3" placeholder="Например: Сабине — часть долга"></textarea>
+            </label>
 
             <label class="field">
               <span class="field-label">Источник оплаты старого долга<b>*</b></span>
@@ -172,9 +182,9 @@
               <textarea id="comment" rows="4" placeholder="Важные пояснения по смене"></textarea>
             </label>
             <label class="field">
-              <span class="field-label">Email для копии отчёта<b>*</b></span>
-              <span class="field-english">Report receipt email</span>
-              <input id="email" type="email" inputmode="email" autocomplete="email" placeholder="name@example.com" required />
+              <span class="field-label">Email для связи</span>
+              <span class="field-english">Необязательно</span>
+              <input id="email" type="email" inputmode="email" autocomplete="email" placeholder="name@example.com" />
             </label>
           </div>
         </section>
@@ -193,7 +203,7 @@
       </header>
       <section class="success-card">
         <div class="success-title"><span class="status-dot"></span>Данные сохранены</div>
-        <p>Копия ответов отправлена на <strong id="submitted-email"></strong>. Ниже — готовый текст для группы WhatsApp.</p>
+        <p>Ниже — готовый текст для группы WhatsApp.</p>
         <pre class="report-preview" id="report-preview"></pre>
         <button class="primary-button" id="copy-button" type="button">Скопировать отчёт</button>
         <button class="secondary-button" id="reset-button" type="button">Заполнить новый отчёт</button>
