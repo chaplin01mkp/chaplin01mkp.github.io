@@ -46,6 +46,7 @@ const reportLabels = {
   cardSplit: "Разбивка по картам",
   tipsTransfer: "Чаевые переводом",
   otherReceipts: "Другие поступления",
+  benefits: "Льготные клиенты",
   barberPayroll: "ЗП мастеров",
   adminPayment: "Выплата за админские обязанности",
   managerPayment: "Выплата Светлане",
@@ -83,6 +84,10 @@ const payableDetails = document.getElementById("payable-details");
 const priorPayablePaid = document.getElementById("prior-payable-paid");
 const priorPayableDetails = document.getElementById("prior-payable-details");
 const priorPayableSource = document.getElementById("prior-payable-source");
+const benefitsAnswer = document.getElementById("benefits-answer");
+const benefitsPanel = document.getElementById("benefits-panel");
+const benefitsList = document.getElementById("benefits-list");
+const addBenefitButton = document.getElementById("add-benefit");
 const cardsHint = document.getElementById("cards-hint");
 const submitButton = document.getElementById("submit-button");
 const errorMessage = document.getElementById("error-message");
@@ -90,6 +95,7 @@ const targetFrame = document.getElementById("google-form-target");
 let selectedCards = [];
 let submissionStarted = false;
 let submittedAnswers = null;
+let benefitCounter = 0;
 
 const now = new Date();
 const localDate = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
@@ -118,6 +124,109 @@ document.querySelectorAll("#cards .chip").forEach((button) => {
     cardsHint.classList.toggle("is-hidden", selectedCards.length > 0);
   });
 });
+
+function calculateBenefitPayment(card) {
+  const listPrice = Number(card.querySelector(".benefit-list-price").value);
+  const type = card.querySelector(".benefit-type").value;
+  const payment = type === "Скидка 40%" && Number.isFinite(listPrice)
+    ? Math.round(listPrice * 0.6 * 100) / 100
+    : 0;
+  card.querySelector(".benefit-payment").value = payment.toFixed(2);
+}
+
+function syncBenefitBasis(card) {
+  const basis = card.querySelector(".benefit-basis").value;
+  const month = card.querySelector(".benefit-month");
+  const note = card.querySelector(".benefit-limit-note");
+  const isOwnerDecision = basis === "Решение собственника";
+  month.disabled = isOwnerDecision;
+  month.required = !isOwnerDecision;
+  if (isOwnerDecision) month.value = "";
+  note.classList.toggle("is-hidden", !isOwnerDecision);
+}
+
+function addBenefit() {
+  if (!benefitsList) return;
+  benefitCounter += 1;
+  const card = document.createElement("article");
+  card.className = "benefit-card";
+  card.innerHTML = `
+    <div class="benefit-card-header">
+      <strong>Льготный клиент <span class="benefit-number"></span></strong>
+      <button class="benefit-remove" type="button">Удалить</button>
+    </div>
+    <div class="benefit-grid">
+      <label class="field"><span class="field-label">Барбер<b>*</b></span><span class="field-english">Barber</span><input class="benefit-barber" type="text" required /></label>
+      <label class="field"><span class="field-label">Клиент<b>*</b></span><span class="field-english">Client name</span><input class="benefit-client" type="text" required /></label>
+      <label class="field"><span class="field-label">Телефон клиента<b>*</b></span><span class="field-english">Client phone</span><input class="benefit-phone" type="tel" inputmode="tel" required /></label>
+      <label class="field"><span class="field-label">Тип льготы<b>*</b></span><span class="field-english">Benefit type</span><select class="benefit-type" required><option>Скидка 40%</option><option>Бесплатник</option><option>Бесплатник-родственник</option></select></label>
+      <label class="field amount-field"><span class="field-label">Полная стоимость по прайсу<b>*</b></span><span class="field-english">List price, RUB</span><span class="amount-wrap"><input class="benefit-list-price" type="number" min="0.01" step="0.01" required /><i>₽</i></span></label>
+      <label class="field amount-field"><span class="field-label">Фактически оплатил клиент</span><span class="field-english">Calculated automatically</span><span class="amount-wrap"><input class="benefit-payment" type="number" value="0.00" readonly /><i>₽</i></span></label>
+      <label class="field"><span class="field-label">Основание<b>*</b></span><span class="field-english">Benefit basis</span><select class="benefit-basis" required><option>Лимит барбера</option><option>Решение собственника</option></select></label>
+      <label class="field"><span class="field-label">Месяц списания лимита<b>*</b></span><span class="field-english">Current or next month only</span><select class="benefit-month" required><option value="">Выберите месяц</option><option>Текущий месяц</option><option>Следующий месяц</option></select><span class="benefit-limit-note is-hidden">По решению собственника лимит барбера не расходуется.</span></label>
+      <label class="field full-width"><span class="field-label">Комментарий</span><span class="field-english">Services or important details · optional</span><textarea class="benefit-comment" rows="2" placeholder="Например: стрижка + борода"></textarea></label>
+    </div>
+  `;
+  card.querySelector(".benefit-number").textContent = benefitCounter;
+  card.querySelector(".benefit-remove").addEventListener("click", () => card.remove());
+  card.querySelector(".benefit-type").addEventListener("change", () => calculateBenefitPayment(card));
+  card.querySelector(".benefit-list-price").addEventListener("input", () => calculateBenefitPayment(card));
+  card.querySelector(".benefit-basis").addEventListener("change", () => syncBenefitBasis(card));
+  benefitsList.appendChild(card);
+  calculateBenefitPayment(card);
+  syncBenefitBasis(card);
+}
+
+function syncBenefitsVisibility() {
+  if (!benefitsAnswer || !benefitsPanel || !benefitsList) return;
+  const hasBenefits = benefitsAnswer.value === "Да";
+  benefitsPanel.classList.toggle("is-hidden", !hasBenefits);
+  if (hasBenefits && benefitsList.children.length === 0) addBenefit();
+  if (!hasBenefits) benefitsList.replaceChildren();
+}
+
+function ensureBenefitRows() {
+  if (benefitsAnswer && benefitsAnswer.value === "Да" && benefitsList.children.length === 0) addBenefit();
+}
+
+function getBenefits() {
+  if (!benefitsAnswer || benefitsAnswer.value !== "Да") return [];
+  return [...benefitsList.querySelectorAll(".benefit-card")].map((card) => {
+    const basis = card.querySelector(".benefit-basis").value;
+    return {
+      barber: card.querySelector(".benefit-barber").value.trim(),
+      client: card.querySelector(".benefit-client").value.trim(),
+      phone: card.querySelector(".benefit-phone").value.trim(),
+      type: card.querySelector(".benefit-type").value,
+      listPrice: card.querySelector(".benefit-list-price").value,
+      payment: card.querySelector(".benefit-payment").value,
+      basis,
+      month: basis === "Решение собственника" ? "Не списывается" : card.querySelector(".benefit-month").value,
+      comment: card.querySelector(".benefit-comment").value.trim(),
+    };
+  });
+}
+
+function formatBenefits(benefits) {
+  if (!benefits || benefits.length === 0) return "Не было";
+  return benefits.map((item, index) => [
+    (index + 1) + ". Барбер: " + item.barber,
+    "клиент: " + item.client,
+    "телефон: " + item.phone,
+    "тип: " + item.type,
+    "прайс: " + formatValue("services", item.listPrice),
+    "оплата: " + formatValue("services", item.payment),
+    "основание: " + item.basis,
+    "месяц: " + item.month,
+    "комментарий: " + (item.comment || "—"),
+  ].join("; ")).join("\n");
+}
+
+if (benefitsAnswer) {
+  benefitsAnswer.addEventListener("change", syncBenefitsVisibility);
+  addBenefitButton.addEventListener("click", addBenefit);
+  syncBenefitsVisibility();
+}
 
 administrator.addEventListener("change", () => {
   const isOther = administrator.value === "Другой";
@@ -173,6 +282,7 @@ function getAnswers() {
   answers.expenseDetails = expenseDetails.value.trim();
   answers.priorPayableDetails = priorPayableDetails.value.trim();
   if (answers.administrator !== "Светлана") answers.managerPayment = "0";
+  answers.benefits = getBenefits();
   return answers;
 }
 
@@ -180,6 +290,7 @@ function buildStructuredComment(answers) {
   return [
     `Расходы: ${answers.expenseDetails || "—"}`,
     `Старый долг: ${answers.priorPayableDetails || "—"}`,
+    `Льготные клиенты:\n${formatBenefits(answers.benefits)}`,
     `Комментарий: ${answers.comment || "—"}`,
     `Email: ${answers.email || "—"}`,
   ].join("\n");
@@ -226,6 +337,7 @@ closingForm.addEventListener("submit", (event) => {
   errorMessage.classList.add("is-hidden");
 
   syncConditionalRequirements();
+  ensureBenefitRows();
   if (!closingForm.reportValidity()) return;
   if (selectedCards.length === 0) {
     cardsHint.classList.remove("is-hidden");
@@ -250,6 +362,7 @@ targetFrame.addEventListener("load", () => {
 });
 
 function formatValue(key, value) {
+  if (key === "benefits") return formatBenefits(value);
   if (Array.isArray(value)) return value.join(", ") || "—";
   if (amountKeys.has(key)) {
     const number = Number(String(value).replace(",", "."));
