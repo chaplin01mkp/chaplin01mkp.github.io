@@ -7,7 +7,7 @@
     <meta name="description" content="CHAPLIN Finance OS — закрытие смены" />
     <title>CHAPLIN — Закрытие смены</title>
     <link rel="icon" href="favicon.svg" type="image/svg+xml" />
-    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="styles.css?v=2" />
   </head>
   <body>
     <main class="shell" id="form-screen">
@@ -88,7 +88,7 @@
             <div><h2>Выручка</h2><p>Revenue</p></div>
           </div>
           <div class="field-grid">
-            <label class="field amount-field"><span class="field-label">Выручка услуг<b>*</b></span><span class="field-english">Amount, RUB</span><span class="amount-wrap"><input id="services" type="number" min="0" step="0.01" value="0" required /><i>₽</i></span></label>
+            <label class="field amount-field"><span class="field-label">Выручка услуг<b>*</b></span><span class="field-english">Фактически оплачено после скидок · Amount, RUB</span><span class="amount-wrap"><input id="services" type="number" min="0" step="0.01" value="0" required /><i>₽</i></span></label>
             <label class="field amount-field"><span class="field-label">Продажа косметики<b>*</b></span><span class="field-english">Amount, RUB</span><span class="amount-wrap"><input id="retail" type="number" min="0" step="0.01" value="0" required /><i>₽</i></span></label>
             <label class="field amount-field"><span class="field-label">Напитки<b>*</b></span><span class="field-english">Amount, RUB</span><span class="amount-wrap"><input id="beverages" type="number" min="0" step="0.01" value="0" required /><i>₽</i></span></label>
             <label class="field amount-field"><span class="field-label">Чаевые всего<b>*</b></span><span class="field-english">Amount, RUB</span><span class="amount-wrap"><input id="tips" type="number" min="0" step="0.01" value="0" required /><i>₽</i></span></label>
@@ -123,6 +123,31 @@
         <section class="form-section">
           <div class="section-heading">
             <span>03</span>
+            <div><h2>Скидки и бесплатные услуги</h2><p>Benefits</p></div>
+          </div>
+          <div class="field-grid">
+            <label class="field full-width">
+              <span class="field-label">Были скидки или бесплатные услуги?<b>*</b></span>
+              <span class="field-english">Benefits during this shift</span>
+              <select id="benefits-answer" required>
+                <option>Нет</option>
+                <option>Да</option>
+              </select>
+            </label>
+
+            <div id="benefits-panel" class="benefits-panel is-hidden">
+              <div class="notice benefit-rule">
+                Выручка услуг выше указывается по фактической оплате. Скидка 40% считается автоматически, бесплатный визит — 0 ₽.
+              </div>
+              <div id="benefits-list" class="benefits-list"></div>
+              <button id="add-benefit" class="secondary-button add-benefit-button" type="button">Добавить ещё клиента</button>
+            </div>
+          </div>
+        </section>
+
+        <section class="form-section">
+          <div class="section-heading">
+            <span>04</span>
             <div><h2>Выплаты</h2><p>Payroll</p></div>
           </div>
           <div class="field-grid">
@@ -134,7 +159,7 @@
 
         <section class="form-section">
           <div class="section-heading">
-            <span>04</span>
+            <span>05</span>
             <div><h2>Расходы и остаток</h2><p>Expenses &amp; balance</p></div>
           </div>
           <div class="field-grid">
@@ -211,6 +236,6 @@
     </main>
 
     <iframe id="google-form-target" name="google-form-target" title="Отправка формы"></iframe>
-    <script src="app.js?v=4"></script>
+    <script src="app.js?v=5"></script>
   </body>
 </html>
