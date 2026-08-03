@@ -63,6 +63,11 @@ const reportLabels = {
   comment: "Комментарий",
 };
 
+const googleAdminFixedOptions = new Set([
+  "Александр", "Бэлла", "Валерия", "Вероника", "Виталий", "Денис",
+  "Мартин", "Олег", "Ольга", "Полина", "Светлана",
+]);
+
 const amountKeys = new Set([
   "services", "retail", "beverages", "tips", "cash", "clientTransfers",
   "totalTransferred", "tipsTransfer", "otherReceipts", "barberPayroll",
@@ -96,6 +101,8 @@ let selectedCards = [];
 let submissionStarted = false;
 let submittedAnswers = null;
 let benefitCounter = 0;
+let activeTransport = null;
+let submissionTimeoutId = null;
 
 const now = new Date();
 const localDate = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
@@ -318,7 +325,12 @@ function sendToGoogle(answers) {
 
   for (const [key, [, entryId]] of Object.entries(fieldMap)) {
     const value = key === "comment" ? buildStructuredComment(answers) : answers[key];
-    addHiddenInput(transport, `entry.${entryId}`, value);
+    if (key === "administrator" && !googleAdminFixedOptions.has(value)) {
+      addHiddenInput(transport, `entry.${entryId}`, "__other_option__");
+      addHiddenInput(transport, `entry.${entryId}.other_option_response`, value);
+    } else {
+      addHiddenInput(transport, `entry.${entryId}`, value);
+    }
   }
   answers.cards.forEach((card) => addHiddenInput(transport, "entry.69256334", card));
   addHiddenInput(transport, "entry.1591994395", answers.administrator === "Светлана" ? "Да" : "Нет");
@@ -327,9 +339,20 @@ function sendToGoogle(answers) {
   addHiddenInput(transport, "submissionTimestamp", "-1");
 
   document.body.appendChild(transport);
+  activeTransport = transport;
   submissionStarted = true;
   transport.submit();
-  transport.remove();
+
+  submissionTimeoutId = window.setTimeout(() => {
+    if (!submissionStarted) return;
+    submissionStarted = false;
+    activeTransport?.remove();
+    activeTransport = null;
+    submitButton.disabled = false;
+    submitButton.textContent = "Отправить отчёт";
+    errorMessage.textContent = "Google не подтвердил отправку. Проверьте интернет и попробуйте ещё раз.";
+    errorMessage.classList.remove("is-hidden");
+  }, 25000);
 }
 
 closingForm.addEventListener("submit", (event) => {
@@ -358,6 +381,10 @@ closingForm.addEventListener("submit", (event) => {
 targetFrame.addEventListener("load", () => {
   if (!submissionStarted || !submittedAnswers) return;
   submissionStarted = false;
+  if (submissionTimeoutId) window.clearTimeout(submissionTimeoutId);
+  submissionTimeoutId = null;
+  activeTransport?.remove();
+  activeTransport = null;
   showSuccess(submittedAnswers);
 });
 
@@ -373,7 +400,7 @@ function formatValue(key, value) {
 
 function buildReport(answers) {
   const rows = Object.entries(reportLabels).map(([key, label]) => `${label}: ${formatValue(key, answers[key])}`);
-  return ["CHAPLIN — ЗАКРЫТИЕ СМЕНЫ", ...rows, "", "Отчёт принят ✓"].join("\n");
+  return ["CHAPLIN — ЗАКРЫТИЕ СМЕНЫ", ...rows, "", "Отчёт отправлен ✓"].join("\n");
 }
 
 function showSuccess(answers) {
@@ -392,3 +419,4 @@ document.getElementById("copy-button").addEventListener("click", async () => {
 document.getElementById("reset-button").addEventListener("click", () => {
   window.location.reload();
 });
+
