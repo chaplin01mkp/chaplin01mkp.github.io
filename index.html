@@ -90,7 +90,7 @@
           <div class="field-grid">
             <label class="field amount-field"><span class="field-label">Выручка услуг<b>*</b></span><span class="field-english">Фактически оплачено после скидок · Amount, RUB</span><span class="amount-wrap"><input id="services" type="number" min="0" step="0.01" value="0" required /><i>₽</i></span></label>
             <label class="field amount-field"><span class="field-label">Продажа косметики<b>*</b></span><span class="field-english">Amount, RUB</span><span class="amount-wrap"><input id="retail" type="number" min="0" step="0.01" value="0" required /><i>₽</i></span></label>
-            <label class="field amount-field"><span class="field-label">Напитки<b>*</b></span><span class="field-english">Amount, RUB</span><span class="amount-wrap"><input id="beverages" type="number" min="0" step="0.01" value="0" required /><i>₽</i></span></label>
+            <label class="field amount-field"><span class="field-label">Напитки</span><span class="field-english">Amount, RUB</span><span class="amount-wrap"><input id="beverages" type="number" min="0" step="0.01" value="0" /><i>₽</i></span></label>
             <label class="field amount-field"><span class="field-label">Чаевые всего<b>*</b></span><span class="field-english">Amount, RUB</span><span class="amount-wrap"><input id="tips" type="number" min="0" step="0.01" value="0" required /><i>₽</i></span></label>
             <label class="field amount-field"><span class="field-label">Наличные от клиентов<b>*</b></span><span class="field-english">Amount, RUB</span><span class="amount-wrap"><input id="cash" type="number" min="0" step="0.01" value="0" required /><i>₽</i></span></label>
             <label class="field amount-field"><span class="field-label">Переводы клиентов мастерам<b>*</b></span><span class="field-english">Amount, RUB</span><span class="amount-wrap"><input id="client-transfers" type="number" min="0" step="0.01" value="0" required /><i>₽</i></span></label>
@@ -163,32 +163,32 @@
             <div><h2>Расходы и остаток</h2><p>Expenses &amp; balance</p></div>
           </div>
           <div class="field-grid">
-            <label class="field amount-field"><span class="field-label">Уборка<b>*</b></span><span class="field-english">Amount, RUB</span><span class="amount-wrap"><input id="cleaning" type="number" min="0" step="0.01" value="0" required /><i>₽</i></span></label>
-            <label class="field amount-field"><span class="field-label">Расходы, возникшие сегодня (кроме уборки)<b>*</b></span><span class="field-english">Amount, RUB</span><span class="amount-wrap"><input id="expenses-incurred" type="number" min="0" step="0.01" value="0" required /><i>₽</i></span></label>
+            <label class="field amount-field"><span class="field-label">Уборка</span><span class="field-english">Amount, RUB</span><span class="amount-wrap"><input id="cleaning" type="number" min="0" step="0.01" value="0" /><i>₽</i></span></label>
+            <label class="field amount-field"><span class="field-label">Расходы, возникшие сегодня (кроме уборки)</span><span class="field-english">Amount, RUB</span><span class="amount-wrap"><input id="expenses-incurred" type="number" min="0" step="0.01" value="0" /><i>₽</i></span></label>
             <label class="field">
               <span class="field-label">На что потрачено?<b id="expense-details-required" class="is-hidden">*</b></span>
               <span class="field-english">Обязательно, если расходы больше 0</span>
               <textarea id="expense-details" rows="3" placeholder="Например: вода — 500; лампочки — 1 200"></textarea>
             </label>
-            <label class="field amount-field"><span class="field-label">Фактически оплачено по новым расходам (включая уборку)<b>*</b></span><span class="field-english">Amount, RUB</span><span class="amount-wrap"><input id="new-expenses-paid" type="number" min="0" step="0.01" value="0" required /><i>₽</i></span></label>
-            <label class="field amount-field"><span class="field-label">Осталось оплатить позже (включая уборку)<b>*</b></span><span class="field-english">Amount, RUB</span><span class="amount-wrap"><input id="new-payable" type="number" min="0" step="0.01" value="0" required /><i>₽</i></span></label>
+            <label class="field amount-field"><span class="field-label">Фактически оплачено по новым расходам (включая уборку)</span><span class="field-english">Amount, RUB</span><span class="amount-wrap"><input id="new-expenses-paid" type="number" min="0" step="0.01" value="0" /><i>₽</i></span></label>
+            <label class="field amount-field"><span class="field-label">Осталось оплатить позже (включая уборку)</span><span class="field-english">Amount, RUB</span><span class="amount-wrap"><input id="new-payable" type="number" min="0" step="0.01" value="0" /><i>₽</i></span></label>
 
             <label class="field">
               <span class="field-label">Кому и за что должны<b id="payable-details-required" class="is-hidden">*</b></span>
               <span class="field-english">Обязательно, если осталось оплатить позже</span>
               <textarea id="payable-details" rows="3" placeholder="Если долга нет — оставьте пустым"></textarea>
             </label>
-            <label class="field amount-field"><span class="field-label">Оплачено сегодня по старым долгам<b>*</b></span><span class="field-english">Amount, RUB</span><span class="amount-wrap"><input id="prior-payable-paid" type="number" min="0" step="0.01" value="0" required /><i>₽</i></span></label>
+            <label class="field amount-field"><span class="field-label">Оплачено сегодня по старым долгам</span><span class="field-english">Amount, RUB</span><span class="amount-wrap"><input id="prior-payable-paid" type="number" min="0" step="0.01" value="0" /><i>₽</i></span></label>
             <label class="field">
               <span class="field-label">Кому и за какой старый долг заплатили?<b id="prior-payable-details-required" class="is-hidden">*</b></span>
               <span class="field-english">Обязательно, если оплачено больше 0</span>
-              <textarea id="prior-payable-details" rows="3" placeholder="Например: Сабине — часть долга"></textarea>
+              <textarea id="prior-payable-details" rows="3" placeholder="Если старый долг не оплачивали — оставьте пустым"></textarea>
             </label>
 
             <label class="field">
-              <span class="field-label">Источник оплаты старого долга<b>*</b></span>
+              <span class="field-label">Источник оплаты старого долга</span>
               <span class="field-english">Payment source</span>
-              <select id="prior-payable-source" required>
+              <select id="prior-payable-source">
                 <option>Не было</option>
                 <option>Наличные</option>
                 <option>Ozon Света</option>
@@ -236,7 +236,8 @@
     </main>
 
     <iframe id="google-form-target" name="google-form-target" title="Отправка формы"></iframe>
-    <script src="app.js?v=6"></script>
+    <script src="app.js?v=7"></script>
   </body>
 </html>
+
 
