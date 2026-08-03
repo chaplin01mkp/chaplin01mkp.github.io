@@ -63,11 +63,6 @@ const reportLabels = {
   comment: "Комментарий",
 };
 
-const googleAdminFixedOptions = new Set([
-  "Александр", "Бэлла", "Валерия", "Вероника", "Виталий", "Денис",
-  "Мартин", "Олег", "Ольга", "Полина", "Светлана",
-]);
-
 const amountKeys = new Set([
   "services", "retail", "beverages", "tips", "cash", "clientTransfers",
   "totalTransferred", "tipsTransfer", "otherReceipts", "barberPayroll",
@@ -319,12 +314,7 @@ function sendToGoogle(answers) {
 
   for (const [key, [, entryId]] of Object.entries(fieldMap)) {
     const value = key === "comment" ? buildStructuredComment(answers) : answers[key];
-    if (key === "administrator" && !googleAdminFixedOptions.has(value)) {
-      addHiddenInput(transport, `entry.${entryId}`, "__other_option__");
-      addHiddenInput(transport, `entry.${entryId}.other_option_response`, value);
-    } else {
-      addHiddenInput(transport, `entry.${entryId}`, value);
-    }
+    addHiddenInput(transport, `entry.${entryId}`, value);
   }
   answers.cards.forEach((card) => addHiddenInput(transport, "entry.69256334", card));
   addHiddenInput(transport, "entry.1591994395", answers.administrator === "Светлана" ? "Да" : "Нет");
@@ -413,5 +403,6 @@ document.getElementById("copy-button").addEventListener("click", async () => {
 document.getElementById("reset-button").addEventListener("click", () => {
   window.location.reload();
 });
+
 
 
