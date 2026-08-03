@@ -262,17 +262,11 @@ function syncConditionalRequirements() {
   document.getElementById("payable-details-required").classList.toggle("is-hidden", !needsPayableDetails);
   document.getElementById("prior-payable-details-required").classList.toggle("is-hidden", !needsPriorPayableDetails);
 
-  priorPayableSource.setCustomValidity(
-    needsPriorPayableDetails && priorPayableSource.value === "Не было"
-      ? "Выберите, откуда оплатили старый долг"
-      : ""
-  );
 }
 
 [expensesIncurred, newPayable, priorPayablePaid].forEach((input) => {
   input.addEventListener("input", syncConditionalRequirements);
 });
-priorPayableSource.addEventListener("change", syncConditionalRequirements);
 syncConditionalRequirements();
 
 function getAnswers() {
@@ -419,4 +413,5 @@ document.getElementById("copy-button").addEventListener("click", async () => {
 document.getElementById("reset-button").addEventListener("click", () => {
   window.location.reload();
 });
+
 
