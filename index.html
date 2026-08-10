@@ -152,8 +152,19 @@
           </div>
           <div class="field-grid">
             <label class="field amount-field"><span class="field-label">Общая ЗП мастеров за смену<b>*</b></span><span class="field-english">Amount, RUB</span><span class="amount-wrap"><input id="barber-payroll" type="number" min="0" step="0.01" value="0" required /><i>₽</i></span></label>
+            <label class="field amount-field"><span class="field-label">ЗП мастеров — наличными</span><span class="field-english">Cash, RUB</span><span class="amount-wrap"><input id="barber-payroll-cash" type="number" min="0" step="0.01" value="0" /><i>₽</i></span></label>
+            <label class="field amount-field"><span class="field-label">ЗП мастеров — картой</span><span class="field-english">Card, RUB</span><span class="amount-wrap"><input id="barber-payroll-card" type="number" min="0" step="0.01" value="0" /><i>₽</i></span></label>
+            <label class="field"><span class="field-label">С какой карты выплачена ЗП мастеров<b id="barber-payroll-card-details-required" class="is-hidden">*</b></span><span class="field-english">Обязательно, если сумма картой больше 0</span><input id="barber-payroll-card-details" type="text" placeholder="Например: Ozon Анзаур — 2 000" /></label>
+
             <label class="field amount-field"><span class="field-label">Фактическая выплата за админские обязанности<b>*</b></span><span class="field-english">Amount, RUB</span><span class="amount-wrap"><input id="admin-payment" type="number" min="0" step="0.01" value="0" required /><i>₽</i></span></label>
-            <label id="manager-field" class="field amount-field is-hidden"><span class="field-label">Доплата Светлане как управляющей<b>*</b></span><span class="field-english">Amount, RUB</span><span class="amount-wrap"><input id="manager-payment" type="number" min="0" step="0.01" value="0" /><i>₽</i></span></label>
+            <label class="field amount-field"><span class="field-label">Админские — наличными</span><span class="field-english">Cash, RUB</span><span class="amount-wrap"><input id="admin-payment-cash" type="number" min="0" step="0.01" value="0" /><i>₽</i></span></label>
+            <label class="field amount-field"><span class="field-label">Админские — картой</span><span class="field-english">Card, RUB</span><span class="amount-wrap"><input id="admin-payment-card" type="number" min="0" step="0.01" value="0" /><i>₽</i></span></label>
+            <label class="field"><span class="field-label">С какой карты выплачены админские<b id="admin-payment-card-details-required" class="is-hidden">*</b></span><span class="field-english">Обязательно, если сумма картой больше 0</span><input id="admin-payment-card-details" type="text" placeholder="Например: Ozon Света — 500" /></label>
+
+            <label id="manager-field" class="field amount-field manager-source-field is-hidden"><span class="field-label">Доплата Светлане как управляющей<b>*</b></span><span class="field-english">Amount, RUB</span><span class="amount-wrap"><input id="manager-payment" type="number" min="0" step="0.01" value="0" /><i>₽</i></span></label>
+            <label class="field amount-field manager-source-field is-hidden"><span class="field-label">Светлане — наличными</span><span class="field-english">Cash, RUB</span><span class="amount-wrap"><input id="manager-payment-cash" type="number" min="0" step="0.01" value="0" /><i>₽</i></span></label>
+            <label class="field amount-field manager-source-field is-hidden"><span class="field-label">Светлане — картой</span><span class="field-english">Card, RUB</span><span class="amount-wrap"><input id="manager-payment-card" type="number" min="0" step="0.01" value="0" /><i>₽</i></span></label>
+            <label class="field manager-source-field is-hidden"><span class="field-label">С какой карты выплачено Светлане<b id="manager-payment-card-details-required" class="is-hidden">*</b></span><span class="field-english">Обязательно, если сумма картой больше 0</span><input id="manager-payment-card-details" type="text" placeholder="Например: Ozon Анзаур — 1 500" /></label>
           </div>
         </section>
 
@@ -171,6 +182,9 @@
               <textarea id="expense-details" rows="3" placeholder="Например: вода — 500; лампочки — 1 200"></textarea>
             </label>
             <label class="field amount-field"><span class="field-label">Фактически оплачено по новым расходам (включая уборку)</span><span class="field-english">Amount, RUB</span><span class="amount-wrap"><input id="new-expenses-paid" type="number" min="0" step="0.01" value="0" /><i>₽</i></span></label>
+            <label class="field amount-field"><span class="field-label">Новые расходы — наличными</span><span class="field-english">Cash, RUB</span><span class="amount-wrap"><input id="new-expenses-cash" type="number" min="0" step="0.01" value="0" /><i>₽</i></span></label>
+            <label class="field amount-field"><span class="field-label">Новые расходы — картой</span><span class="field-english">Card, RUB</span><span class="amount-wrap"><input id="new-expenses-card" type="number" min="0" step="0.01" value="0" /><i>₽</i></span></label>
+            <label class="field"><span class="field-label">С какой карты оплачены новые расходы<b id="new-expenses-card-details-required" class="is-hidden">*</b></span><span class="field-english">Обязательно, если сумма картой больше 0</span><input id="new-expenses-card-details" type="text" placeholder="Например: T-Банк Сайда — 1 200" /></label>
             <label class="field amount-field"><span class="field-label">Осталось оплатить позже (включая уборку)</span><span class="field-english">Amount, RUB</span><span class="amount-wrap"><input id="new-payable" type="number" min="0" step="0.01" value="0" /><i>₽</i></span></label>
 
             <label class="field">
@@ -236,7 +250,7 @@
     </main>
 
     <iframe id="google-form-target" name="google-form-target" title="Отправка формы"></iframe>
-    <script src="app.js?v=8"></script>
+    <script src="app.js?v=9"></script>
   </body>
 </html>
 
