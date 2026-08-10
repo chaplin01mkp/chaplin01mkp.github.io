@@ -48,12 +48,24 @@ const reportLabels = {
   otherReceipts: "Другие поступления",
   benefits: "Льготные клиенты",
   barberPayroll: "ЗП мастеров",
+  barberPayrollCash: "ЗП мастеров — наличными",
+  barberPayrollCard: "ЗП мастеров — картой",
+  barberPayrollCardDetails: "Карта выплаты ЗП мастеров",
   adminPayment: "Выплата за админские обязанности",
+  adminPaymentCash: "Админские — наличными",
+  adminPaymentCard: "Админские — картой",
+  adminPaymentCardDetails: "Карта выплаты админских",
   managerPayment: "Выплата Светлане",
+  managerPaymentCash: "Светлане — наличными",
+  managerPaymentCard: "Светлане — картой",
+  managerPaymentCardDetails: "Карта выплаты Светлане",
   cleaning: "Уборка",
   expensesIncurred: "Расходы возникли сегодня",
   expenseDetails: "На что потрачено",
   newExpensesPaid: "Новые расходы оплачены сегодня",
+  newExpensesCash: "Новые расходы — наличными",
+  newExpensesCard: "Новые расходы — картой",
+  newExpensesCardDetails: "Карта оплаты новых расходов",
   newPayable: "Осталось оплатить позже",
   payableDetails: "Кому и за что должны",
   priorPayablePaid: "Оплачено по старым долгам",
@@ -66,8 +78,10 @@ const reportLabels = {
 const amountKeys = new Set([
   "services", "retail", "beverages", "tips", "cash", "clientTransfers",
   "totalTransferred", "tipsTransfer", "otherReceipts", "barberPayroll",
-  "adminPayment", "managerPayment", "cleaning", "expensesIncurred",
-  "newExpensesPaid", "newPayable", "priorPayablePaid", "cashBalance",
+  "barberPayrollCash", "barberPayrollCard", "adminPayment", "adminPaymentCash",
+  "adminPaymentCard", "managerPayment", "managerPaymentCash", "managerPaymentCard",
+  "cleaning", "expensesIncurred", "newExpensesPaid", "newExpensesCash",
+  "newExpensesCard", "newPayable", "priorPayablePaid", "cashBalance",
 ]);
 
 const closingForm = document.getElementById("closing-form");
@@ -76,7 +90,20 @@ const successScreen = document.getElementById("success-screen");
 const administrator = document.getElementById("administrator");
 const otherAdministrator = document.getElementById("other-administrator");
 const managerField = document.getElementById("manager-field");
+const managerSourceFields = document.querySelectorAll(".manager-source-field");
 const managerPayment = document.getElementById("manager-payment");
+const barberPayrollCash = document.getElementById("barber-payroll-cash");
+const barberPayrollCard = document.getElementById("barber-payroll-card");
+const barberPayrollCardDetails = document.getElementById("barber-payroll-card-details");
+const adminPaymentCash = document.getElementById("admin-payment-cash");
+const adminPaymentCard = document.getElementById("admin-payment-card");
+const adminPaymentCardDetails = document.getElementById("admin-payment-card-details");
+const managerPaymentCash = document.getElementById("manager-payment-cash");
+const managerPaymentCard = document.getElementById("manager-payment-card");
+const managerPaymentCardDetails = document.getElementById("manager-payment-card-details");
+const newExpensesCash = document.getElementById("new-expenses-cash");
+const newExpensesCard = document.getElementById("new-expenses-card");
+const newExpensesCardDetails = document.getElementById("new-expenses-card-details");
 const expensesIncurred = document.getElementById("expenses-incurred");
 const expenseDetails = document.getElementById("expense-details");
 const newPayable = document.getElementById("new-payable");
@@ -235,13 +262,85 @@ administrator.addEventListener("change", () => {
   const isSvetlana = administrator.value === "Светлана";
   otherAdministrator.classList.toggle("is-hidden", !isOther);
   otherAdministrator.required = isOther;
-  managerField.classList.toggle("is-hidden", !isSvetlana);
+  managerSourceFields.forEach((field) => field.classList.toggle("is-hidden", !isSvetlana));
   managerPayment.required = isSvetlana;
-  if (!isSvetlana) managerPayment.value = "0";
+  if (!isSvetlana) {
+    managerPayment.value = "0";
+    managerPaymentCash.value = "0";
+    managerPaymentCard.value = "0";
+    managerPaymentCardDetails.value = "";
+  }
+  syncPaymentSourceRequirements();
 });
 
 function isPositive(value) {
   return Number(String(value).replace(",", ".")) > 0;
+}
+
+function numberValue(value) {
+  const number = Number(String(value).replace(",", "."));
+  return Number.isFinite(number) ? number : 0;
+}
+
+const paymentSourceGroups = [
+  {
+    label: "ЗП мастеров",
+    total: document.getElementById("barber-payroll"),
+    cash: barberPayrollCash,
+    card: barberPayrollCard,
+    details: barberPayrollCardDetails,
+    requiredMark: document.getElementById("barber-payroll-card-details-required"),
+  },
+  {
+    label: "админские обязанности",
+    total: document.getElementById("admin-payment"),
+    cash: adminPaymentCash,
+    card: adminPaymentCard,
+    details: adminPaymentCardDetails,
+    requiredMark: document.getElementById("admin-payment-card-details-required"),
+  },
+  {
+    label: "выплата Светлане",
+    total: managerPayment,
+    cash: managerPaymentCash,
+    card: managerPaymentCard,
+    details: managerPaymentCardDetails,
+    requiredMark: document.getElementById("manager-payment-card-details-required"),
+    active: () => administrator.value === "Светлана",
+  },
+  {
+    label: "новые расходы",
+    total: document.getElementById("new-expenses-paid"),
+    cash: newExpensesCash,
+    card: newExpensesCard,
+    details: newExpensesCardDetails,
+    requiredMark: document.getElementById("new-expenses-card-details-required"),
+  },
+];
+
+function syncPaymentSourceRequirements() {
+  paymentSourceGroups.forEach((group) => {
+    const active = group.active ? group.active() : true;
+    const needsDetails = active && isPositive(group.card.value);
+    group.details.required = needsDetails;
+    group.requiredMark.classList.toggle("is-hidden", !needsDetails);
+  });
+}
+
+function validatePaymentBreakdowns() {
+  for (const group of paymentSourceGroups) {
+    if (group.active && !group.active()) continue;
+    const total = numberValue(group.total.value);
+    const split = numberValue(group.cash.value) + numberValue(group.card.value);
+    if (Math.abs(total - split) > 0.01) {
+      errorMessage.textContent = `Проверьте «${group.label}»: наличные + карта должны равняться общей сумме ${new Intl.NumberFormat("ru-RU").format(total)} ₽.`;
+      errorMessage.classList.remove("is-hidden");
+      group.cash.scrollIntoView({ behavior: "smooth", block: "center" });
+      group.cash.focus();
+      return false;
+    }
+  }
+  return true;
 }
 
 function syncConditionalRequirements() {
@@ -262,7 +361,13 @@ function syncConditionalRequirements() {
 [expensesIncurred, newPayable, priorPayablePaid].forEach((input) => {
   input.addEventListener("input", syncConditionalRequirements);
 });
+paymentSourceGroups.forEach((group) => {
+  [group.total, group.cash, group.card, group.details].forEach((input) => {
+    input.addEventListener("input", syncPaymentSourceRequirements);
+  });
+});
 syncConditionalRequirements();
+syncPaymentSourceRequirements();
 
 function getAnswers() {
   const answers = {};
@@ -277,13 +382,34 @@ function getAnswers() {
   answers.email = document.getElementById("email").value.trim();
   answers.expenseDetails = expenseDetails.value.trim();
   answers.priorPayableDetails = priorPayableDetails.value.trim();
-  if (answers.administrator !== "Светлана") answers.managerPayment = "0";
+  answers.barberPayrollCash = barberPayrollCash.value;
+  answers.barberPayrollCard = barberPayrollCard.value;
+  answers.barberPayrollCardDetails = barberPayrollCardDetails.value.trim();
+  answers.adminPaymentCash = adminPaymentCash.value;
+  answers.adminPaymentCard = adminPaymentCard.value;
+  answers.adminPaymentCardDetails = adminPaymentCardDetails.value.trim();
+  answers.managerPaymentCash = managerPaymentCash.value;
+  answers.managerPaymentCard = managerPaymentCard.value;
+  answers.managerPaymentCardDetails = managerPaymentCardDetails.value.trim();
+  answers.newExpensesCash = newExpensesCash.value;
+  answers.newExpensesCard = newExpensesCard.value;
+  answers.newExpensesCardDetails = newExpensesCardDetails.value.trim();
+  if (answers.administrator !== "Светлана") {
+    answers.managerPayment = "0";
+    answers.managerPaymentCash = "0";
+    answers.managerPaymentCard = "0";
+    answers.managerPaymentCardDetails = "";
+  }
   answers.benefits = getBenefits();
   return answers;
 }
 
 function buildStructuredComment(answers) {
   return [
+    `ЗП мастеров источник: наличные=${numberValue(answers.barberPayrollCash)}; карта=${numberValue(answers.barberPayrollCard)}; карты=${answers.barberPayrollCardDetails || "—"}`,
+    `Админские источник: наличные=${numberValue(answers.adminPaymentCash)}; карта=${numberValue(answers.adminPaymentCard)}; карты=${answers.adminPaymentCardDetails || "—"}`,
+    `Светлана источник: наличные=${numberValue(answers.managerPaymentCash)}; карта=${numberValue(answers.managerPaymentCard)}; карты=${answers.managerPaymentCardDetails || "—"}`,
+    `Новые расходы источник: наличные=${numberValue(answers.newExpensesCash)}; карта=${numberValue(answers.newExpensesCard)}; карты=${answers.newExpensesCardDetails || "—"}`,
     `Расходы: ${answers.expenseDetails || "—"}`,
     `Старый долг: ${answers.priorPayableDetails || "—"}`,
     `Льготные клиенты:\n${formatBenefits(answers.benefits)}`,
@@ -344,8 +470,10 @@ closingForm.addEventListener("submit", (event) => {
   errorMessage.classList.add("is-hidden");
 
   syncConditionalRequirements();
+  syncPaymentSourceRequirements();
   ensureBenefitRows();
   if (!closingForm.reportValidity()) return;
+  if (!validatePaymentBreakdowns()) return;
   if (selectedCards.length === 0) {
     cardsHint.classList.remove("is-hidden");
     document.getElementById("cards").scrollIntoView({ behavior: "smooth", block: "center" });
