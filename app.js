@@ -39,13 +39,11 @@ const reportLabels = {
   services: "Выручка услуг",
   retail: "Продажа косметики",
   beverages: "Напитки",
-  tips: "Чаевые всего",
   cash: "Наличные от клиентов",
   clientTransfers: "Переводы клиентов мастерам",
   totalTransferred: "Мастера перевели бизнесу",
   cards: "Карты бизнеса",
   cardSplit: "Разбивка по картам",
-  tipsTransfer: "Чаевые переводом",
   otherReceipts: "Другие поступления",
   benefits: "Льготные клиенты",
   barberPayroll: "ЗП мастеров",
@@ -93,6 +91,18 @@ const otherAdministrator = document.getElementById("other-administrator");
 const managerField = document.getElementById("manager-field");
 const managerSourceFields = document.querySelectorAll(".manager-source-field");
 const managerPayment = document.getElementById("manager-payment");
+const barberPayroll = document.getElementById("barber-payroll");
+const totalTransferred = document.getElementById("total-transferred");
+const businessCardsField = document.getElementById("business-cards-field");
+const cardSplitField = document.getElementById("card-split-field");
+const cardSplitInput = document.getElementById("card-split");
+const otherReceiptsAnswer = document.getElementById("other-receipts-answer");
+const otherReceiptsField = document.getElementById("other-receipts-field");
+const otherReceipts = document.getElementById("other-receipts");
+const newPayableAnswer = document.getElementById("new-payable-answer");
+const newPayableFields = document.querySelectorAll(".new-payable-field");
+const priorPayableAnswer = document.getElementById("prior-payable-answer");
+const priorPayableFields = document.querySelectorAll(".prior-payable-field");
 const barberPayrollCash = document.getElementById("barber-payroll-cash");
 const barberPayrollCard = document.getElementById("barber-payroll-card");
 const barberPayrollCardDetails = document.getElementById("barber-payroll-card-details");
@@ -120,6 +130,7 @@ const cardsHint = document.getElementById("cards-hint");
 const submitButton = document.getElementById("submit-button");
 const errorMessage = document.getElementById("error-message");
 const targetFrame = document.getElementById("google-form-target");
+const emailInput = document.getElementById("email");
 let selectedCards = [];
 let submissionStarted = false;
 let submittedAnswers = null;
@@ -130,6 +141,7 @@ let submissionTimeoutId = null;
 const now = new Date();
 const localDate = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
 document.getElementById("closing-date").value = localDate;
+emailInput.value = window.localStorage.getItem("chaplin-report-email") || "";
 
 document.querySelectorAll("#branch-options button").forEach((button) => {
   button.addEventListener("click", () => {
@@ -283,10 +295,38 @@ function numberValue(value) {
   return Number.isFinite(number) ? number : 0;
 }
 
+function syncBarberPayrollTotal() {
+  const total = numberValue(barberPayrollCash.value) + numberValue(barberPayrollCard.value);
+  barberPayroll.value = total.toFixed(2);
+}
+
+function syncBusinessTransferVisibility() {
+  const hasTransfer = isPositive(totalTransferred.value);
+  businessCardsField.classList.toggle("is-hidden", !hasTransfer);
+  cardSplitField.classList.toggle("is-hidden", !hasTransfer);
+  cardSplitInput.required = hasTransfer;
+  if (!hasTransfer) {
+    selectedCards = [];
+    document.querySelectorAll("#cards .chip").forEach((button) => {
+      button.classList.remove("selected");
+      button.querySelector("span").textContent = "+";
+    });
+    cardSplitInput.value = "";
+    cardsHint.classList.add("is-hidden");
+  }
+}
+
+function syncOtherReceiptsVisibility() {
+  const hasOtherReceipts = otherReceiptsAnswer.value === "Да";
+  otherReceiptsField.classList.toggle("is-hidden", !hasOtherReceipts);
+  otherReceipts.required = hasOtherReceipts;
+  if (!hasOtherReceipts) otherReceipts.value = "0";
+}
+
 const paymentSourceGroups = [
   {
     label: "ЗП мастеров",
-    total: document.getElementById("barber-payroll"),
+    total: barberPayroll,
     cash: barberPayrollCash,
     card: barberPayrollCard,
     details: barberPayrollCardDetails,
@@ -379,27 +419,55 @@ function validateShiftReconciliation() {
 
 function syncConditionalRequirements() {
   const needsExpenseDetails = isPositive(expensesIncurred.value);
-  const needsPayableDetails = isPositive(newPayable.value);
-  const needsPriorPayableDetails = isPositive(priorPayablePaid.value);
+  const hasNewPayable = newPayableAnswer.value === "Да";
+  const hasPriorPayable = priorPayableAnswer.value === "Да";
 
+  newPayableFields.forEach((field) => field.classList.toggle("is-hidden", !hasNewPayable));
+  priorPayableFields.forEach((field) => field.classList.toggle("is-hidden", !hasPriorPayable));
+
+  newPayable.required = hasNewPayable;
+  payableDetails.required = hasNewPayable && isPositive(newPayable.value);
+  priorPayablePaid.required = hasPriorPayable;
+  priorPayableDetails.required = hasPriorPayable && isPositive(priorPayablePaid.value);
+  priorPayableSource.required = hasPriorPayable;
   expenseDetails.required = needsExpenseDetails;
-  payableDetails.required = needsPayableDetails;
-  priorPayableDetails.required = needsPriorPayableDetails;
+
+  if (!hasNewPayable) {
+    newPayable.value = "0";
+    payableDetails.value = "";
+  }
+  if (!hasPriorPayable) {
+    priorPayablePaid.value = "0";
+    priorPayableDetails.value = "";
+    priorPayableSource.value = "Не было";
+  }
 
   document.getElementById("expense-details-required").classList.toggle("is-hidden", !needsExpenseDetails);
-  document.getElementById("payable-details-required").classList.toggle("is-hidden", !needsPayableDetails);
-  document.getElementById("prior-payable-details-required").classList.toggle("is-hidden", !needsPriorPayableDetails);
-
+  document.getElementById("payable-details-required").classList.toggle("is-hidden", !payableDetails.required);
+  document.getElementById("prior-payable-details-required").classList.toggle("is-hidden", !priorPayableDetails.required);
 }
 
 [expensesIncurred, newPayable, priorPayablePaid].forEach((input) => {
   input.addEventListener("input", syncConditionalRequirements);
+});
+newPayableAnswer.addEventListener("change", syncConditionalRequirements);
+priorPayableAnswer.addEventListener("change", syncConditionalRequirements);
+otherReceiptsAnswer.addEventListener("change", syncOtherReceiptsVisibility);
+totalTransferred.addEventListener("input", syncBusinessTransferVisibility);
+[barberPayrollCash, barberPayrollCard].forEach((input) => {
+  input.addEventListener("input", () => {
+    syncBarberPayrollTotal();
+    syncPaymentSourceRequirements();
+  });
 });
 paymentSourceGroups.forEach((group) => {
   [group.total, group.cash, group.card, group.details].forEach((input) => {
     input.addEventListener("input", syncPaymentSourceRequirements);
   });
 });
+syncBarberPayrollTotal();
+syncBusinessTransferVisibility();
+syncOtherReceiptsVisibility();
 syncConditionalRequirements();
 syncPaymentSourceRequirements();
 
@@ -413,7 +481,8 @@ function getAnswers() {
     ? otherAdministrator.value.trim()
     : administrator.value;
   answers.cards = [...selectedCards];
-  answers.email = document.getElementById("email").value.trim();
+  answers.email = emailInput.value.trim();
+  window.localStorage.setItem("chaplin-report-email", answers.email);
   answers.expenseDetails = expenseDetails.value.trim();
   answers.priorPayableDetails = priorPayableDetails.value.trim();
   answers.barberPayrollCash = barberPayrollCash.value;
@@ -481,6 +550,7 @@ function sendToGoogle(answers) {
   addHiddenInput(transport, "fvv", "1");
   addHiddenInput(transport, "pageHistory", "0");
   addHiddenInput(transport, "submissionTimestamp", "-1");
+  addHiddenInput(transport, "emailAddress", answers.email);
 
   document.body.appendChild(transport);
   activeTransport = transport;
