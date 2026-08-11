@@ -1,6 +1,7 @@
 "use strict";
 
 const FORM_ENDPOINT = "https://docs.google.com/forms/d/e/1FAIpQLSdTwbdgK4zG0CTnFWTdSZMgq41Dtx8CJZfcVf-ryZMt8YvEnQ/formResponse";
+const RECONCILIATION_TOLERANCE = 100;
 
 const fieldMap = {
   branch: ["branch", "122330299"],
@@ -343,6 +344,39 @@ function validatePaymentBreakdowns() {
   return true;
 }
 
+function validateShiftReconciliation() {
+  const expectedRevenue =
+    numberValue(document.getElementById("services").value) +
+    numberValue(document.getElementById("retail").value) +
+    numberValue(document.getElementById("beverages").value);
+  const clientPayments =
+    numberValue(document.getElementById("cash").value) +
+    numberValue(document.getElementById("client-transfers").value);
+  const variance = clientPayments - expectedRevenue;
+
+  if (Math.abs(variance) > RECONCILIATION_TOLERANCE) {
+    errorMessage.textContent =
+      `Проверьте оплату клиентов: наличные + переводы отличаются от выручки услуг, косметики и напитков на ${new Intl.NumberFormat("ru-RU").format(Math.abs(variance))} ₽. Допустимо не более ${RECONCILIATION_TOLERANCE} ₽.`;
+    errorMessage.classList.remove("is-hidden");
+    document.getElementById("cash").scrollIntoView({ behavior: "smooth", block: "center" });
+    document.getElementById("cash").focus();
+    return false;
+  }
+
+  const clientTransfersAmount = numberValue(document.getElementById("client-transfers").value);
+  const businessTransferAmount = numberValue(document.getElementById("total-transferred").value);
+  if (businessTransferAmount > clientTransfersAmount) {
+    errorMessage.textContent =
+      "Проверьте переводы: мастера не могут перевести бизнесу больше, чем получили переводами от клиентов.";
+    errorMessage.classList.remove("is-hidden");
+    document.getElementById("total-transferred").scrollIntoView({ behavior: "smooth", block: "center" });
+    document.getElementById("total-transferred").focus();
+    return false;
+  }
+
+  return true;
+}
+
 function syncConditionalRequirements() {
   const needsExpenseDetails = isPositive(expensesIncurred.value);
   const needsPayableDetails = isPositive(newPayable.value);
@@ -474,7 +508,8 @@ closingForm.addEventListener("submit", (event) => {
   ensureBenefitRows();
   if (!closingForm.reportValidity()) return;
   if (!validatePaymentBreakdowns()) return;
-  if (selectedCards.length === 0) {
+  if (!validateShiftReconciliation()) return;
+  if (numberValue(document.getElementById("total-transferred").value) > 0 && selectedCards.length === 0) {
     cardsHint.classList.remove("is-hidden");
     document.getElementById("cards").scrollIntoView({ behavior: "smooth", block: "center" });
     return;
@@ -512,7 +547,7 @@ function formatValue(key, value) {
 
 function buildReport(answers) {
   const rows = Object.entries(reportLabels).map(([key, label]) => `${label}: ${formatValue(key, answers[key])}`);
-  return ["CHAPLIN — ЗАКРЫТИЕ СМЕНЫ", ...rows, "", "Отчёт отправлен на проверку ⏳"].join("\n");
+  return ["CHAPLIN — ЗАКРЫТИЕ СМЕНЫ", ...rows, "", "Отчёт отправлен ✓"].join("\n");
 }
 
 function showSuccess(answers) {
