@@ -1,6 +1,6 @@
 "use strict";
 
-const FORM_ENDPOINT = "https://docs.google.com/forms/d/e/1FAIpQLSdTwbdgK4zG0CTnFWTdSZMgq41Dtx8CJZfcVf-ryZMt8YvEnQ/formResponse";
+const FORM_ENDPOINT = "https://docs.google.com/forms/u/0/d/e/1FAIpQLSdTwbdgK4zG0CTnFWTdSZMgq41Dtx8CJZfcVf-ryZMt8YvEnQ/formResponse";
 const RECONCILIATION_TOLERANCE = 100;
 
 const fieldMap = {
