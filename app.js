@@ -130,7 +130,6 @@ const cardsHint = document.getElementById("cards-hint");
 const submitButton = document.getElementById("submit-button");
 const errorMessage = document.getElementById("error-message");
 const targetFrame = document.getElementById("google-form-target");
-const emailInput = document.getElementById("email");
 let selectedCards = [];
 let submissionStarted = false;
 let submittedAnswers = null;
@@ -141,7 +140,6 @@ let submissionTimeoutId = null;
 const now = new Date();
 const localDate = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
 document.getElementById("closing-date").value = localDate;
-emailInput.value = window.localStorage.getItem("chaplin-report-email") || "";
 
 document.querySelectorAll("#branch-options button").forEach((button) => {
   button.addEventListener("click", () => {
@@ -484,8 +482,7 @@ function getAnswers() {
     ? otherAdministrator.value.trim()
     : administrator.value;
   answers.cards = [...selectedCards];
-  answers.email = emailInput.value.trim();
-  window.localStorage.setItem("chaplin-report-email", answers.email);
+  answers.email = "";
   answers.expenseDetails = expenseDetails.value.trim();
   answers.priorPayableDetails = priorPayableDetails.value.trim();
   answers.barberPayrollCash = barberPayrollCash.value;
@@ -520,7 +517,6 @@ function buildStructuredComment(answers) {
     `Старый долг: ${answers.priorPayableDetails || "—"}`,
     `Льготные клиенты:\n${formatBenefits(answers.benefits)}`,
     `Комментарий: ${answers.comment || "—"}`,
-    `Email: ${answers.email || "—"}`,
   ].join("\n");
 }
 
@@ -553,8 +549,6 @@ function sendToGoogle(answers) {
   addHiddenInput(transport, "fvv", "1");
   addHiddenInput(transport, "pageHistory", "0");
   addHiddenInput(transport, "submissionTimestamp", "-1");
-  addHiddenInput(transport, "emailAddress", answers.email);
-  addHiddenInput(transport, "emailReceipt", "true");
 
   document.body.appendChild(transport);
   activeTransport = transport;
