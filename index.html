@@ -91,12 +91,12 @@
             <label class="field amount-field"><span class="field-label">Выручка услуг<b>*</b></span><span class="field-english">Фактически оплачено после скидок · Amount, RUB</span><span class="amount-wrap"><input id="services" type="number" min="0" step="0.01" value="0" required /><i>₽</i></span></label>
             <label class="field amount-field"><span class="field-label">Продажа косметики<b>*</b></span><span class="field-english">Amount, RUB</span><span class="amount-wrap"><input id="retail" type="number" min="0" step="0.01" value="0" required /><i>₽</i></span></label>
             <label class="field amount-field"><span class="field-label">Напитки</span><span class="field-english">Amount, RUB</span><span class="amount-wrap"><input id="beverages" type="number" min="0" step="0.01" value="0" /><i>₽</i></span></label>
-            <label class="field amount-field"><span class="field-label">Чаевые всего<b>*</b></span><span class="field-english">Amount, RUB</span><span class="amount-wrap"><input id="tips" type="number" min="0" step="0.01" value="0" required /><i>₽</i></span></label>
+            <input id="tips" type="hidden" value="0" />
             <label class="field amount-field"><span class="field-label">Наличные от клиентов<b>*</b></span><span class="field-english">Amount, RUB</span><span class="amount-wrap"><input id="cash" type="number" min="0" step="0.01" value="0" required /><i>₽</i></span></label>
             <label class="field amount-field"><span class="field-label">Переводы клиентов мастерам<b>*</b></span><span class="field-english">Amount, RUB</span><span class="amount-wrap"><input id="client-transfers" type="number" min="0" step="0.01" value="0" required /><i>₽</i></span></label>
             <label class="field amount-field"><span class="field-label">Сколько мастера перевели бизнесу в конце смены<b>*</b></span><span class="field-english">После удержания своей доли · Amount, RUB</span><span class="amount-wrap"><input id="total-transferred" type="number" min="0" step="0.01" value="0" required /><i>₽</i></span></label>
 
-            <div class="field">
+            <div class="field is-hidden" id="business-cards-field">
               <span class="field-label">На какие карты бизнеса перевели?<b>*</b></span>
               <span class="field-english">Collection accounts</span>
               <div class="chips" id="cards">
@@ -110,13 +110,18 @@
               <p id="cards-hint" class="field-hint is-hidden">Выберите минимум одну карту</p>
             </div>
 
-            <label class="field">
+            <label class="field is-hidden" id="card-split-field">
               <span class="field-label">Разбивка: карта — сумма — назначение<b>*</b></span>
               <span class="field-english">Card split &amp; purpose</span>
-              <input id="card-split" type="text" placeholder="Например: Ozon Света — 8 500 — свет" required />
+              <input id="card-split" type="text" placeholder="Например: Ozon Света — 8 500 — свет" />
             </label>
-            <label class="field amount-field"><span class="field-label">Чаевые переводом<b>*</b></span><span class="field-english">Amount, RUB</span><span class="amount-wrap"><input id="tips-transfer" type="number" min="0" step="0.01" value="0" required /><i>₽</i></span></label>
-            <label class="field amount-field"><span class="field-label">Другие поступления бизнеса<b>*</b></span><span class="field-english">Amount, RUB</span><span class="amount-wrap"><input id="other-receipts" type="number" min="0" step="0.01" value="0" required /><i>₽</i></span></label>
+            <input id="tips-transfer" type="hidden" value="0" />
+            <label class="field">
+              <span class="field-label">Были другие поступления бизнеса?<b>*</b></span>
+              <span class="field-english">Other business receipts</span>
+              <select id="other-receipts-answer" required><option>Нет</option><option>Да</option></select>
+            </label>
+            <label class="field amount-field is-hidden" id="other-receipts-field"><span class="field-label">Сумма других поступлений<b>*</b></span><span class="field-english">Amount, RUB</span><span class="amount-wrap"><input id="other-receipts" type="number" min="0.01" step="0.01" value="0" /><i>₽</i></span></label>
           </div>
         </section>
 
@@ -151,7 +156,7 @@
             <div><h2>Выплаты</h2><p>Payroll</p></div>
           </div>
           <div class="field-grid">
-            <label class="field amount-field"><span class="field-label">Общая ЗП мастеров за смену<b>*</b></span><span class="field-english">Amount, RUB</span><span class="amount-wrap"><input id="barber-payroll" type="number" min="0" step="0.01" value="0" required /><i>₽</i></span></label>
+            <label class="field amount-field"><span class="field-label">Общая ЗП мастеров за смену</span><span class="field-english">Рассчитывается автоматически: наличные + карта</span><span class="amount-wrap"><input id="barber-payroll" type="number" min="0" step="0.01" value="0" readonly /><i>₽</i></span></label>
             <label class="field amount-field"><span class="field-label">ЗП мастеров — наличными</span><span class="field-english">Cash, RUB</span><span class="amount-wrap"><input id="barber-payroll-cash" type="number" min="0" step="0.01" value="0" /><i>₽</i></span></label>
             <label class="field amount-field"><span class="field-label">ЗП мастеров — картой</span><span class="field-english">Card, RUB</span><span class="amount-wrap"><input id="barber-payroll-card" type="number" min="0" step="0.01" value="0" /><i>₽</i></span></label>
             <label class="field"><span class="field-label">С какой карты выплачена ЗП мастеров<b id="barber-payroll-card-details-required" class="is-hidden">*</b></span><span class="field-english">Обязательно, если сумма картой больше 0</span><input id="barber-payroll-card-details" type="text" placeholder="Например: Ozon Анзаур — 2 000" /></label>
@@ -185,22 +190,31 @@
             <label class="field amount-field"><span class="field-label">Новые расходы — наличными</span><span class="field-english">Cash, RUB</span><span class="amount-wrap"><input id="new-expenses-cash" type="number" min="0" step="0.01" value="0" /><i>₽</i></span></label>
             <label class="field amount-field"><span class="field-label">Новые расходы — картой</span><span class="field-english">Card, RUB</span><span class="amount-wrap"><input id="new-expenses-card" type="number" min="0" step="0.01" value="0" /><i>₽</i></span></label>
             <label class="field"><span class="field-label">С какой карты оплачены новые расходы<b id="new-expenses-card-details-required" class="is-hidden">*</b></span><span class="field-english">Обязательно, если сумма картой больше 0</span><input id="new-expenses-card-details" type="text" placeholder="Например: T-Банк Сайда — 1 200" /></label>
-            <label class="field amount-field"><span class="field-label">Осталось оплатить позже (включая уборку)</span><span class="field-english">Amount, RUB</span><span class="amount-wrap"><input id="new-payable" type="number" min="0" step="0.01" value="0" /><i>₽</i></span></label>
-
             <label class="field">
+              <span class="field-label">Осталось что-то оплатить позже?<b>*</b></span>
+              <span class="field-english">New payable</span>
+              <select id="new-payable-answer" required><option>Нет</option><option>Да</option></select>
+            </label>
+            <label class="field amount-field new-payable-field is-hidden"><span class="field-label">Сумма к оплате позже<b>*</b></span><span class="field-english">Amount, RUB</span><span class="amount-wrap"><input id="new-payable" type="number" min="0.01" step="0.01" value="0" /><i>₽</i></span></label>
+            <label class="field new-payable-field is-hidden">
               <span class="field-label">Кому и за что должны<b id="payable-details-required" class="is-hidden">*</b></span>
               <span class="field-english">Обязательно, если осталось оплатить позже</span>
-              <textarea id="payable-details" rows="3" placeholder="Если долга нет — оставьте пустым"></textarea>
+              <textarea id="payable-details" rows="3"></textarea>
             </label>
-            <label class="field amount-field"><span class="field-label">Оплачено сегодня по старым долгам</span><span class="field-english">Amount, RUB</span><span class="amount-wrap"><input id="prior-payable-paid" type="number" min="0" step="0.01" value="0" /><i>₽</i></span></label>
             <label class="field">
+              <span class="field-label">Оплачивали сегодня старые долги?<b>*</b></span>
+              <span class="field-english">Prior payable</span>
+              <select id="prior-payable-answer" required><option>Нет</option><option>Да</option></select>
+            </label>
+            <label class="field amount-field prior-payable-field is-hidden"><span class="field-label">Сумма оплаты старого долга<b>*</b></span><span class="field-english">Amount, RUB</span><span class="amount-wrap"><input id="prior-payable-paid" type="number" min="0.01" step="0.01" value="0" /><i>₽</i></span></label>
+            <label class="field prior-payable-field is-hidden">
               <span class="field-label">Кому и за какой старый долг заплатили?<b id="prior-payable-details-required" class="is-hidden">*</b></span>
               <span class="field-english">Обязательно, если оплачено больше 0</span>
-              <textarea id="prior-payable-details" rows="3" placeholder="Если старый долг не оплачивали — оставьте пустым"></textarea>
+              <textarea id="prior-payable-details" rows="3"></textarea>
             </label>
 
-            <label class="field">
-              <span class="field-label">Источник оплаты старого долга</span>
+            <label class="field prior-payable-field is-hidden">
+              <span class="field-label">Источник оплаты старого долга<b>*</b></span>
               <span class="field-english">Payment source</span>
               <select id="prior-payable-source">
                 <option>Не было</option>
@@ -221,9 +235,9 @@
               <textarea id="comment" rows="4" placeholder="Важные пояснения по смене"></textarea>
             </label>
             <label class="field">
-              <span class="field-label">Email для связи</span>
-              <span class="field-english">Необязательно</span>
-              <input id="email" type="email" inputmode="email" autocomplete="email" placeholder="name@example.com" />
+              <span class="field-label">Email для копии отчёта<b>*</b></span>
+              <span class="field-english">Запоминается только на этом устройстве</span>
+              <input id="email" type="email" inputmode="email" autocomplete="email" required placeholder="name@example.com" />
             </label>
           </div>
         </section>
@@ -250,7 +264,7 @@
     </main>
 
     <iframe id="google-form-target" name="google-form-target" title="Отправка формы"></iframe>
-    <script src="app.js?v=11"></script>
+    <script src="app.js?v=12"></script>
   </body>
 </html>
 
