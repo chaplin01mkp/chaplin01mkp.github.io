@@ -320,6 +320,7 @@ function syncOtherReceiptsVisibility() {
   const hasOtherReceipts = otherReceiptsAnswer.value === "Да";
   otherReceiptsField.classList.toggle("is-hidden", !hasOtherReceipts);
   otherReceipts.required = hasOtherReceipts;
+  otherReceipts.min = hasOtherReceipts ? "0.01" : "0";
   if (!hasOtherReceipts) otherReceipts.value = "0";
 }
 
@@ -426,6 +427,8 @@ function syncConditionalRequirements() {
   priorPayableFields.forEach((field) => field.classList.toggle("is-hidden", !hasPriorPayable));
 
   newPayable.required = hasNewPayable;
+  newPayable.min = hasNewPayable ? "0.01" : "0";
+  priorPayablePaid.min = hasPriorPayable ? "0.01" : "0";
   payableDetails.required = hasNewPayable && isPositive(newPayable.value);
   priorPayablePaid.required = hasPriorPayable;
   priorPayableDetails.required = hasPriorPayable && isPositive(priorPayablePaid.value);
