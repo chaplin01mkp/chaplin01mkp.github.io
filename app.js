@@ -554,6 +554,7 @@ function sendToGoogle(answers) {
   addHiddenInput(transport, "pageHistory", "0");
   addHiddenInput(transport, "submissionTimestamp", "-1");
   addHiddenInput(transport, "emailAddress", answers.email);
+  addHiddenInput(transport, "emailReceipt", "true");
 
   document.body.appendChild(transport);
   activeTransport = transport;
