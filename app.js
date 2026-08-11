@@ -512,7 +512,7 @@ function formatValue(key, value) {
 
 function buildReport(answers) {
   const rows = Object.entries(reportLabels).map(([key, label]) => `${label}: ${formatValue(key, answers[key])}`);
-  return ["CHAPLIN — ЗАКРЫТИЕ СМЕНЫ", ...rows, "", "Отчёт отправлен ✓"].join("\n");
+  return ["CHAPLIN — ЗАКРЫТИЕ СМЕНЫ", ...rows, "", "Отчёт отправлен на проверку ⏳"].join("\n");
 }
 
 function showSuccess(answers) {
