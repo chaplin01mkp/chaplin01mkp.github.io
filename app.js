@@ -482,7 +482,7 @@ function getAnswers() {
     ? otherAdministrator.value.trim()
     : administrator.value;
   answers.cards = [...selectedCards];
-  answers.email = "";
+  answers.email = document.getElementById("email").value.trim();
   answers.expenseDetails = expenseDetails.value.trim();
   answers.priorPayableDetails = priorPayableDetails.value.trim();
   answers.barberPayrollCash = barberPayrollCash.value;
@@ -545,6 +545,7 @@ function sendToGoogle(answers) {
     addHiddenInput(transport, `entry.${entryId}`, value);
   }
   answers.cards.forEach((card) => addHiddenInput(transport, "entry.69256334", card));
+  addHiddenInput(transport, "email", answers.email);
   addHiddenInput(transport, "entry.1591994395", answers.administrator === "Светлана" ? "Да" : "Нет");
   addHiddenInput(transport, "fvv", "1");
   addHiddenInput(transport, "pageHistory", "0");
