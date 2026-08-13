@@ -41,6 +41,7 @@ const reportLabels = {
   beverages: "Напитки",
   cash: "Наличные от клиентов",
   clientTransfers: "Переводы клиентов мастерам",
+  certificatePayment: "Оплата сертификатом",
   totalTransferred: "Мастера перевели бизнесу",
   cards: "Карты бизнеса",
   cardSplit: "Разбивка по картам",
@@ -75,7 +76,7 @@ const reportLabels = {
 };
 
 const amountKeys = new Set([
-  "services", "retail", "beverages", "tips", "cash", "clientTransfers",
+  "services", "retail", "beverages", "tips", "cash", "clientTransfers", "certificatePayment",
   "totalTransferred", "tipsTransfer", "otherReceipts", "barberPayroll",
   "barberPayrollCash", "barberPayrollCard", "adminPayment", "adminPaymentCash",
   "adminPaymentCard", "managerPayment", "managerPaymentCash", "managerPaymentCard",
@@ -390,12 +391,13 @@ function validateShiftReconciliation() {
     numberValue(document.getElementById("beverages").value);
   const clientPayments =
     numberValue(document.getElementById("cash").value) +
-    numberValue(document.getElementById("client-transfers").value);
+    numberValue(document.getElementById("client-transfers").value) +
+    numberValue(document.getElementById("certificate-payment").value);
   const variance = clientPayments - expectedRevenue;
 
   if (Math.abs(variance) > RECONCILIATION_TOLERANCE) {
     errorMessage.textContent =
-      `Проверьте оплату клиентов: наличные + переводы отличаются от выручки услуг, косметики и напитков на ${new Intl.NumberFormat("ru-RU").format(Math.abs(variance))} ₽. Допустимо не более ${RECONCILIATION_TOLERANCE} ₽.`;
+      `Проверьте оплату клиентов: наличные + переводы + сертификат отличаются от выручки услуг, косметики и напитков на ${new Intl.NumberFormat("ru-RU").format(Math.abs(variance))} ₽. Допустимо не более ${RECONCILIATION_TOLERANCE} ₽.`;
     errorMessage.classList.remove("is-hidden");
     document.getElementById("cash").scrollIntoView({ behavior: "smooth", block: "center" });
     document.getElementById("cash").focus();
@@ -483,6 +485,7 @@ function getAnswers() {
     : administrator.value;
   answers.cards = [...selectedCards];
   answers.email = document.getElementById("email").value.trim();
+  answers.certificatePayment = document.getElementById("certificate-payment").value;
   answers.expenseDetails = expenseDetails.value.trim();
   answers.priorPayableDetails = priorPayableDetails.value.trim();
   answers.barberPayrollCash = barberPayrollCash.value;
@@ -546,6 +549,7 @@ function sendToGoogle(answers) {
   }
   answers.cards.forEach((card) => addHiddenInput(transport, "entry.69256334", card));
   addHiddenInput(transport, "email", answers.email);
+  addHiddenInput(transport, "certificatePayment", answers.certificatePayment);
   addHiddenInput(transport, "entry.1591994395", answers.administrator === "Светлана" ? "Да" : "Нет");
   addHiddenInput(transport, "fvv", "1");
   addHiddenInput(transport, "pageHistory", "0");
