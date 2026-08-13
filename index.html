@@ -234,7 +234,11 @@
               <span class="field-english">Comment · optional</span>
               <textarea id="comment" rows="4" placeholder="Важные пояснения по смене"></textarea>
             </label>
-            <input id="email" type="hidden" value="" />
+            <label class="field">
+              <span class="field-label">Почта для копии отчёта</span>
+              <span class="field-english">Необязательно · письмо придёт только на указанный адрес</span>
+              <input id="email" type="email" autocomplete="email" placeholder="name@example.com" />
+            </label>
           </div>
         </section>
 
@@ -260,7 +264,7 @@
     </main>
 
     <iframe id="google-form-target" name="google-form-target" title="Отправка формы"></iframe>
-    <script src="app.js?v=18"></script>
+    <script src="app.js?v=19"></script>
   </body>
 </html>
 
