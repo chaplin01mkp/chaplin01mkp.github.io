@@ -94,6 +94,7 @@
             <input id="tips" type="hidden" value="0" />
             <label class="field amount-field"><span class="field-label">Наличные от клиентов<b>*</b></span><span class="field-english">Amount, RUB</span><span class="amount-wrap"><input id="cash" type="number" min="0" step="0.01" value="0" required /><i>₽</i></span></label>
             <label class="field amount-field"><span class="field-label">Переводы клиентов мастерам<b>*</b></span><span class="field-english">Amount, RUB</span><span class="amount-wrap"><input id="client-transfers" type="number" min="0" step="0.01" value="0" required /><i>₽</i></span></label>
+            <label class="field amount-field"><span class="field-label">Оплата сертификатом</span><span class="field-english">Погашение ранее проданного сертификата · Amount, RUB</span><span class="amount-wrap"><input id="certificate-payment" type="number" min="0" step="0.01" value="0" /><i>₽</i></span></label>
             <label class="field amount-field"><span class="field-label">Сколько мастера перевели бизнесу в конце смены<b>*</b></span><span class="field-english">После удержания своей доли · Amount, RUB</span><span class="amount-wrap"><input id="total-transferred" type="number" min="0" step="0.01" value="0" required /><i>₽</i></span></label>
 
             <div class="field is-hidden" id="business-cards-field">
@@ -264,7 +265,7 @@
     </main>
 
     <iframe id="google-form-target" name="google-form-target" title="Отправка формы"></iframe>
-    <script src="app.js?v=19"></script>
+    <script src="app.js?v=20"></script>
   </body>
 </html>
 
