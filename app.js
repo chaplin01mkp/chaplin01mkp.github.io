@@ -166,13 +166,25 @@ document.querySelectorAll("#cards .chip").forEach((button) => {
   });
 });
 
+function syncBenefitType(card) {
+  const type = card.querySelector(".benefit-type").value;
+  const discountField = card.querySelector(".benefit-discount-field");
+  const discountInput = card.querySelector(".benefit-discount");
+  const isDiscount = type === "Скидка";
+  discountField.classList.toggle("is-hidden", !isDiscount);
+  discountInput.required = isDiscount;
+  if (!isDiscount) discountInput.value = "";
+  calculateBenefitPayment(card);
+}
+
 function calculateBenefitPayment(card) {
   const listPrice = Number(card.querySelector(".benefit-list-price").value);
   const type = card.querySelector(".benefit-type").value;
-  const payment = type === "Скидка 40%" && Number.isFinite(listPrice)
-    ? Math.round(listPrice * 0.6 * 100) / 100
+  const discount = Number(card.querySelector(".benefit-discount").value);
+  const payment = type === "Скидка" && Number.isFinite(listPrice) && Number.isFinite(discount)
+    ? Math.round(listPrice * (1 - discount / 100) * 100) / 100
     : 0;
-  card.querySelector(".benefit-payment").value = payment.toFixed(2);
+  card.querySelector(".benefit-payment").value = Math.max(0, payment).toFixed(2);
 }
 
 function syncBenefitBasis(card) {
@@ -200,7 +212,8 @@ function addBenefit() {
       <label class="field"><span class="field-label">Барбер<b>*</b></span><span class="field-english">Barber</span><input class="benefit-barber" type="text" required /></label>
       <label class="field"><span class="field-label">Клиент<b>*</b></span><span class="field-english">Client name</span><input class="benefit-client" type="text" required /></label>
       <label class="field"><span class="field-label">Телефон клиента<b>*</b></span><span class="field-english">Client phone</span><input class="benefit-phone" type="tel" inputmode="tel" required /></label>
-      <label class="field"><span class="field-label">Тип льготы<b>*</b></span><span class="field-english">Benefit type</span><select class="benefit-type" required><option>Скидка 40%</option><option>Бесплатник</option><option>Бесплатник-родственник</option></select></label>
+      <label class="field"><span class="field-label">Тип льготы<b>*</b></span><span class="field-english">Benefit type</span><select class="benefit-type" required><option>Скидка</option><option>Бесплатник</option><option>Бесплатник-родственник</option></select></label>
+      <label class="field amount-field benefit-discount-field"><span class="field-label">Размер скидки<b>*</b></span><span class="field-english">Discount percent</span><span class="amount-wrap"><input class="benefit-discount" type="number" min="0.01" max="100" step="0.01" required /><i>%</i></span></label>
       <label class="field amount-field"><span class="field-label">Полная стоимость по прайсу<b>*</b></span><span class="field-english">List price, RUB</span><span class="amount-wrap"><input class="benefit-list-price" type="number" min="0.01" step="0.01" required /><i>₽</i></span></label>
       <label class="field amount-field"><span class="field-label">Фактически оплатил клиент</span><span class="field-english">Calculated automatically</span><span class="amount-wrap"><input class="benefit-payment" type="number" value="0.00" readonly /><i>₽</i></span></label>
       <label class="field"><span class="field-label">Основание<b>*</b></span><span class="field-english">Benefit basis</span><select class="benefit-basis" required><option>Лимит барбера</option><option>Решение собственника</option></select></label>
@@ -210,11 +223,12 @@ function addBenefit() {
   `;
   card.querySelector(".benefit-number").textContent = benefitCounter;
   card.querySelector(".benefit-remove").addEventListener("click", () => card.remove());
-  card.querySelector(".benefit-type").addEventListener("change", () => calculateBenefitPayment(card));
+  card.querySelector(".benefit-type").addEventListener("change", () => syncBenefitType(card));
+  card.querySelector(".benefit-discount").addEventListener("input", () => calculateBenefitPayment(card));
   card.querySelector(".benefit-list-price").addEventListener("input", () => calculateBenefitPayment(card));
   card.querySelector(".benefit-basis").addEventListener("change", () => syncBenefitBasis(card));
   benefitsList.appendChild(card);
-  calculateBenefitPayment(card);
+  syncBenefitType(card);
   syncBenefitBasis(card);
 }
 
