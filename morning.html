@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#080808" />
+    <meta name="description" content="CHAPLIN Finance OS — утренний отчёт" />
+    <title>CHAPLIN — Утренний отчёт</title>
+    <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="styles.css?v=2" />
+  </head>
+  <body>
+    <main class="shell" id="form-screen">
+      <header class="brand">
+        <div class="monogram">C</div>
+        <div>
+          <p class="eyebrow">CHAPLIN FINANCE OS</p>
+          <h1>Утренний отчёт</h1>
+          <p class="subtitle">Morning Opening · заполняется до первых операций по филиалу</p>
+        </div>
+      </header>
+
+      <div class="notice">
+        <span class="notice-dot"></span>
+        Укажите фактические остатки на момент открытия смены
+      </div>
+
+      <form id="morning-form">
+        <section class="form-section">
+          <div class="section-heading">
+            <span>01</span>
+            <div><h2>Смена</h2><p>Opening details</p></div>
+          </div>
+          <div class="field-grid">
+            <label class="field">
+              <span class="field-label">Дата отчёта<b>*</b></span>
+              <span class="field-english">Report date</span>
+              <input id="report-date" type="date" required />
+            </label>
+
+            <div class="field">
+              <span class="field-label">Филиал<b>*</b></span>
+              <span class="field-english">Branch</span>
+              <div class="segmented" id="branch-options">
+                <button type="button" data-value="Димитрова">Димитрова</button>
+                <button type="button" data-value="Пролетарская">Пролетарская</button>
+              </div>
+              <input id="branch" class="hidden-required" required tabindex="-1" />
+            </div>
+
+            <label class="field full-width">
+              <span class="field-label">Кто открыл смену?<b>*</b></span>
+              <span class="field-english">Acting administrator</span>
+              <select id="administrator" required>
+                <option value="">Выберите сотрудника</option>
+                <option>Александр</option>
+                <option>Бэлла</option>
+                <option>Валерия</option>
+                <option>Вероника</option>
+                <option>Виталий</option>
+                <option>Денис</option>
+                <option>Дмитрий</option>
+                <option>Мартин</option>
+                <option>Олег</option>
+                <option>Ольга</option>
+                <option>Полина</option>
+                <option>Светлана</option>
+                <option>Другой</option>
+              </select>
+              <input id="other-administrator" class="follow-up-input is-hidden" type="text" placeholder="Укажите имя сотрудника" />
+            </label>
+          </div>
+        </section>
+
+        <section class="form-section">
+          <div class="section-heading">
+            <span>02</span>
+            <div><h2>Остатки</h2><p>Opening balances</p></div>
+          </div>
+          <div class="field-grid">
+            <label class="field amount-field"><span class="field-label">Касса наличными<b>*</b></span><span class="field-english">Cash balance · RUB</span><span class="amount-wrap"><input id="cash" type="number" min="0" step="0.01" value="0" required /><i>₽</i></span></label>
+            <label class="field amount-field"><span class="field-label">T-Банк<b>*</b></span><span class="field-english">Card balance · RUB</span><span class="amount-wrap"><input id="tbank" type="number" min="0" step="0.01" value="0" required /><i>₽</i></span></label>
+            <label class="field amount-field"><span class="field-label">Ozon Света<b>*</b></span><span class="field-english">Card balance · RUB</span><span class="amount-wrap"><input id="ozon-sveta" type="number" min="0" step="0.01" value="0" required /><i>₽</i></span></label>
+            <label class="field amount-field"><span class="field-label">Ozon Вероника<b>*</b></span><span class="field-english">Card balance · RUB</span><span class="amount-wrap"><input id="ozon-veronika" type="number" min="0" step="0.01" value="0" required /><i>₽</i></span></label>
+          </div>
+        </section>
+
+        <div id="error-message" class="error-message is-hidden">Отчёт не сохранился. Проверьте интернет и попробуйте ещё раз.</div>
+        <button id="submit-button" class="primary-button submit-button" type="submit">Отправить отчёт</button>
+        <p class="submit-note">После отправки появится готовый текст для WhatsApp</p>
+      </form>
+    </main>
+
+    <main class="shell success-shell is-hidden" id="success-screen">
+      <header class="brand compact">
+        <div class="monogram">C</div>
+        <div><p class="eyebrow">CHAPLIN FINANCE OS</p><h1>Отчёт отправлен</h1></div>
+        <div class="success-mark" aria-label="Успешно">✓</div>
+      </header>
+      <section class="success-card">
+        <div class="success-title"><span class="status-dot"></span>Утренние остатки отправлены</div>
+        <p>Данные сохранены в Finance OS. Ниже — готовый текст для группы WhatsApp.</p>
+        <pre class="report-preview" id="report-preview"></pre>
+        <button class="primary-button" id="copy-button" type="button">Скопировать отчёт</button>
+        <button class="secondary-button" id="reset-button" type="button">Заполнить новый отчёт</button>
+      </section>
+    </main>
+
+    <iframe id="google-form-target" name="google-form-target" title="Отправка формы"></iframe>
+    <script src="morning.js?v=1"></script>
+  </body>
+</html>
