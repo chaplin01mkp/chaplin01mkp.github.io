@@ -243,7 +243,11 @@
           </div>
         </section>
 
-        <div id="error-message" class="error-message is-hidden">Отчёт не сохранился. Проверьте интернет и попробуйте ещё раз.</div>
+        <div class="form-status" aria-live="polite">
+          <strong>Проверка формы</strong>
+          <span id="form-status-text">Выберите филиал и администратора</span>
+        </div>
+        <div id="error-message" class="error-message is-hidden" role="alert">Отчёт не сохранился. Проверьте интернет и попробуйте ещё раз.</div>
         <button id="submit-button" class="primary-button submit-button" type="submit">Отправить отчёт</button>
         <p class="submit-note">После отправки появится готовый текст для WhatsApp</p>
       </form>
@@ -265,9 +269,8 @@
     </main>
 
     <iframe id="google-form-target" name="google-form-target" title="Отправка формы"></iframe>
-    <script src="app.js?v=21"></script>
+    <script src="app.js?v=22"></script>
   </body>
 </html>
-
 
 

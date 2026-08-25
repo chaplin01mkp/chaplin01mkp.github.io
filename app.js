@@ -130,6 +130,7 @@ const addBenefitButton = document.getElementById("add-benefit");
 const cardsHint = document.getElementById("cards-hint");
 const submitButton = document.getElementById("submit-button");
 const errorMessage = document.getElementById("error-message");
+const formStatusText = document.getElementById("form-status-text");
 const targetFrame = document.getElementById("google-form-target");
 let selectedCards = [];
 let submissionStarted = false;
@@ -147,8 +148,81 @@ document.querySelectorAll("#branch-options button").forEach((button) => {
     document.querySelectorAll("#branch-options button").forEach((item) => item.classList.remove("selected"));
     button.classList.add("selected");
     document.getElementById("branch").value = button.dataset.value;
+    clearFieldError(document.getElementById("branch-options"));
+    updateFormStatus();
   });
 });
+
+function fieldContainer(element) {
+  return element?.closest(".field") || element?.parentElement || null;
+}
+
+function clearFieldError(element) {
+  const container = fieldContainer(element);
+  container?.classList.remove("has-error");
+  container?.querySelectorAll(".inline-error").forEach((item) => item.remove());
+}
+
+function showFieldError(message, element) {
+  document.querySelectorAll(".field.has-error").forEach((item) => item.classList.remove("has-error"));
+  document.querySelectorAll(".inline-error").forEach((item) => item.remove());
+  const container = fieldContainer(element);
+  container?.classList.add("has-error");
+  if (container) {
+    const hint = document.createElement("p");
+    hint.className = "inline-error";
+    hint.textContent = message;
+    container.appendChild(hint);
+  }
+  errorMessage.textContent = message;
+  errorMessage.classList.remove("is-hidden");
+  (container || element).scrollIntoView({ behavior: "smooth", block: "center" });
+  window.setTimeout(() => element?.focus?.({ preventScroll: true }), 250);
+  return false;
+}
+
+function controlLabel(element) {
+  return fieldContainer(element)?.querySelector(".field-label")?.textContent.replace("*", "").trim() || "обязательное поле";
+}
+
+function remainingRequiredCount() {
+  let count = document.getElementById("branch").value ? 0 : 1;
+  [...closingForm.elements].forEach((element) => {
+    if (!element.required || element.id === "branch" || element.disabled || element.closest(".is-hidden")) return;
+    if (!element.validity.valid) count += 1;
+  });
+  if (isPositive(totalTransferred.value) && selectedCards.length === 0) count += 1;
+  return count;
+}
+
+function updateFormStatus() {
+  const count = remainingRequiredCount();
+  const status = formStatusText?.parentElement;
+  if (!formStatusText || !status) return;
+  status.classList.toggle("is-ready", count === 0);
+  formStatusText.textContent = count === 0
+    ? "Обязательные поля заполнены — можно отправлять"
+    : `Осталось заполнить: ${count}. Нажмите «Отправить» — покажу первое место.`;
+}
+
+function validateRequiredFields() {
+  const branch = document.getElementById("branch");
+  if (!branch.value) return showFieldError("Нажмите «Димитрова» или «Пролетарская».", document.getElementById("branch-options"));
+
+  const invalid = [...closingForm.elements].find((element) =>
+    element.required && element.id !== "branch" && !element.disabled && !element.closest(".is-hidden") && !element.validity.valid
+  );
+  if (invalid) {
+    const action = invalid.tagName === "SELECT" ? "Выберите значение" : "Заполните поле";
+    return showFieldError(`${action} «${controlLabel(invalid)}».`, invalid);
+  }
+
+  if (isPositive(totalTransferred.value) && selectedCards.length === 0) {
+    cardsHint.classList.remove("is-hidden");
+    return showFieldError("Выберите карту бизнеса, на которую поступил перевод.", document.getElementById("cards"));
+  }
+  return true;
+}
 
 document.querySelectorAll("#cards .chip").forEach((button) => {
   button.addEventListener("click", () => {
@@ -163,6 +237,8 @@ document.querySelectorAll("#cards .chip").forEach((button) => {
       button.querySelector("span").textContent = "✓";
     }
     cardsHint.classList.toggle("is-hidden", selectedCards.length > 0);
+    clearFieldError(document.getElementById("cards"));
+    updateFormStatus();
   });
 });
 
@@ -297,6 +373,8 @@ administrator.addEventListener("change", () => {
     managerPaymentCardDetails.value = "";
   }
   syncPaymentSourceRequirements();
+  clearFieldError(administrator);
+  updateFormStatus();
 });
 
 function isPositive(value) {
@@ -388,11 +466,7 @@ function validatePaymentBreakdowns() {
     const total = numberValue(group.total.value);
     const split = numberValue(group.cash.value) + numberValue(group.card.value);
     if (Math.abs(total - split) > 0.01) {
-      errorMessage.textContent = `Проверьте «${group.label}»: наличные + карта должны равняться общей сумме ${new Intl.NumberFormat("ru-RU").format(total)} ₽.`;
-      errorMessage.classList.remove("is-hidden");
-      group.cash.scrollIntoView({ behavior: "smooth", block: "center" });
-      group.cash.focus();
-      return false;
+      return showFieldError(`Проверьте «${group.label}»: наличные + карта должны равняться общей сумме ${new Intl.NumberFormat("ru-RU").format(total)} ₽.`, group.cash);
     }
   }
   return true;
@@ -410,23 +484,13 @@ function validateShiftReconciliation() {
   const variance = clientPayments - expectedRevenue;
 
   if (Math.abs(variance) > RECONCILIATION_TOLERANCE) {
-    errorMessage.textContent =
-      `Проверьте оплату клиентов: наличные + переводы + сертификат отличаются от выручки услуг, косметики и напитков на ${new Intl.NumberFormat("ru-RU").format(Math.abs(variance))} ₽. Допустимо не более ${RECONCILIATION_TOLERANCE} ₽.`;
-    errorMessage.classList.remove("is-hidden");
-    document.getElementById("cash").scrollIntoView({ behavior: "smooth", block: "center" });
-    document.getElementById("cash").focus();
-    return false;
+    return showFieldError(`Проверьте оплату клиентов: наличные + переводы + сертификат отличаются от выручки услуг, косметики и напитков на ${new Intl.NumberFormat("ru-RU").format(Math.abs(variance))} ₽. Допустимо не более ${RECONCILIATION_TOLERANCE} ₽.`, document.getElementById("cash"));
   }
 
   const clientTransfersAmount = numberValue(document.getElementById("client-transfers").value);
   const businessTransferAmount = numberValue(document.getElementById("total-transferred").value);
   if (businessTransferAmount > clientTransfersAmount) {
-    errorMessage.textContent =
-      "Проверьте переводы: мастера не могут перевести бизнесу больше, чем получили переводами от клиентов.";
-    errorMessage.classList.remove("is-hidden");
-    document.getElementById("total-transferred").scrollIntoView({ behavior: "smooth", block: "center" });
-    document.getElementById("total-transferred").focus();
-    return false;
+    return showFieldError("Проверьте переводы: мастера не могут перевести бизнесу больше, чем получили переводами от клиентов.", document.getElementById("total-transferred"));
   }
 
   return true;
@@ -487,6 +551,18 @@ syncBusinessTransferVisibility();
 syncOtherReceiptsVisibility();
 syncConditionalRequirements();
 syncPaymentSourceRequirements();
+
+closingForm.addEventListener("input", (event) => {
+  clearFieldError(event.target);
+  errorMessage.classList.add("is-hidden");
+  updateFormStatus();
+});
+closingForm.addEventListener("change", (event) => {
+  clearFieldError(event.target);
+  updateFormStatus();
+});
+closingForm.addEventListener("invalid", (event) => event.preventDefault(), true);
+updateFormStatus();
 
 function getAnswers() {
   const answers = {};
@@ -593,15 +669,12 @@ closingForm.addEventListener("submit", (event) => {
   syncConditionalRequirements();
   syncPaymentSourceRequirements();
   ensureBenefitRows();
-  if (!closingForm.reportValidity()) return;
+  updateFormStatus();
+  if (!validateRequiredFields()) return;
   if (!validatePaymentBreakdowns()) return;
   if (!validateShiftReconciliation()) return;
-  if (numberValue(document.getElementById("total-transferred").value) > 0 && selectedCards.length === 0) {
-    cardsHint.classList.remove("is-hidden");
-    document.getElementById("cards").scrollIntoView({ behavior: "smooth", block: "center" });
-    return;
-  }
   if (!navigator.onLine) {
+    errorMessage.textContent = "Нет подключения к интернету. Подключитесь и нажмите «Отправить отчёт» ещё раз.";
     errorMessage.classList.remove("is-hidden");
     return;
   }
@@ -653,6 +726,4 @@ document.getElementById("copy-button").addEventListener("click", async () => {
 document.getElementById("reset-button").addEventListener("click", () => {
   window.location.reload();
 });
-
-
 

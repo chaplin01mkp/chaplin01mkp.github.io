@@ -5,6 +5,7 @@ const formScreen = document.getElementById("form-screen");
 const successScreen = document.getElementById("success-screen");
 const submitButton = document.getElementById("submit-button");
 const errorMessage = document.getElementById("error-message");
+const formStatusText = document.getElementById("form-status-text");
 const targetFrame = document.getElementById("google-form-target");
 const branch = document.getElementById("branch");
 const administrator = document.getElementById("administrator");
@@ -22,6 +23,8 @@ document.querySelectorAll("#branch-options button").forEach((button) => {
     document.querySelectorAll("#branch-options button").forEach((item) => item.classList.remove("selected"));
     button.classList.add("selected");
     branch.value = button.dataset.value;
+    clearFieldError(document.getElementById("branch-options"));
+    updateFormStatus();
   });
 });
 
@@ -30,7 +33,65 @@ administrator.addEventListener("change", () => {
   otherAdministrator.classList.toggle("is-hidden", !isOther);
   otherAdministrator.required = isOther;
   if (!isOther) otherAdministrator.value = "";
+  clearFieldError(administrator);
+  updateFormStatus();
 });
+
+function fieldContainer(element) {
+  return element?.closest(".field") || element?.parentElement || null;
+}
+
+function clearFieldError(element) {
+  const container = fieldContainer(element);
+  container?.classList.remove("has-error");
+  container?.querySelectorAll(".inline-error").forEach((item) => item.remove());
+}
+
+function showFieldError(message, element) {
+  document.querySelectorAll(".field.has-error").forEach((item) => item.classList.remove("has-error"));
+  document.querySelectorAll(".inline-error").forEach((item) => item.remove());
+  const container = fieldContainer(element);
+  container?.classList.add("has-error");
+  if (container) {
+    const hint = document.createElement("p");
+    hint.className = "inline-error";
+    hint.textContent = message;
+    container.appendChild(hint);
+  }
+  errorMessage.textContent = message;
+  errorMessage.classList.remove("is-hidden");
+  (container || element).scrollIntoView({ behavior: "smooth", block: "center" });
+  window.setTimeout(() => element?.focus?.({ preventScroll: true }), 250);
+  return false;
+}
+
+function controlLabel(element) {
+  return fieldContainer(element)?.querySelector(".field-label")?.textContent.replace("*", "").trim() || "обязательное поле";
+}
+
+function updateFormStatus() {
+  let count = branch.value ? 0 : 1;
+  [...morningForm.elements].forEach((element) => {
+    if (!element.required || element.id === "branch" || element.disabled || element.closest(".is-hidden")) return;
+    if (!element.validity.valid) count += 1;
+  });
+  const status = formStatusText?.parentElement;
+  if (!formStatusText || !status) return;
+  status.classList.toggle("is-ready", count === 0);
+  formStatusText.textContent = count === 0
+    ? "Обязательные поля заполнены — можно отправлять"
+    : `Осталось заполнить: ${count}. Нажмите «Отправить» — покажу первое место.`;
+}
+
+function validateRequiredFields() {
+  if (!branch.value) return showFieldError("Нажмите «Димитрова» или «Пролетарская».", document.getElementById("branch-options"));
+  const invalid = [...morningForm.elements].find((element) =>
+    element.required && element.id !== "branch" && !element.disabled && !element.closest(".is-hidden") && !element.validity.valid
+  );
+  if (!invalid) return true;
+  const action = invalid.tagName === "SELECT" ? "Выберите значение" : "Заполните поле";
+  return showFieldError(`${action} «${controlLabel(invalid)}».`, invalid);
+}
 
 function amount(value) {
   const number = Number(String(value).replace(",", "."));
@@ -38,6 +99,7 @@ function amount(value) {
 }
 
 function rub(value) {
+  if (String(value).trim() === "") return "не указано";
   return `${new Intl.NumberFormat("ru-RU").format(amount(value))} ₽`;
 }
 
@@ -101,8 +163,10 @@ function sendToGoogle(answers) {
 morningForm.addEventListener("submit", (event) => {
   event.preventDefault();
   errorMessage.classList.add("is-hidden");
-  if (!morningForm.reportValidity()) return;
+  updateFormStatus();
+  if (!validateRequiredFields()) return;
   if (!navigator.onLine) {
+    errorMessage.textContent = "Нет подключения к интернету. Подключитесь и нажмите «Отправить отчёт» ещё раз.";
     errorMessage.classList.remove("is-hidden");
     return;
   }
@@ -112,6 +176,18 @@ morningForm.addEventListener("submit", (event) => {
   submitButton.textContent = "Сохраняю…";
   sendToGoogle(submittedAnswers);
 });
+
+morningForm.addEventListener("input", (event) => {
+  clearFieldError(event.target);
+  errorMessage.classList.add("is-hidden");
+  updateFormStatus();
+});
+morningForm.addEventListener("change", (event) => {
+  clearFieldError(event.target);
+  updateFormStatus();
+});
+morningForm.addEventListener("invalid", (event) => event.preventDefault(), true);
+updateFormStatus();
 
 targetFrame.addEventListener("load", () => {
   if (!submissionStarted || !submittedAnswers) return;
