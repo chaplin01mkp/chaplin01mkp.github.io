@@ -1,4 +1,4 @@
-const FORM_ENDPOINT = "https://docs.google.com/forms/d/e/1FAIpQLSesh_va65QitwSrBFbNg7MzTbpBKoISD02gn93AoQDTlYlvrQ/formResponse";
+const FORM_ENDPOINT = "https://script.google.com/macros/s/AKfycbwNSO0hbd09AicYLzcf8JJrEIhRsI8HlVEWcv-GDU_RlsdeiuzTlZL_oNYNDySyaRO3/exec";
 
 const morningForm = document.getElementById("morning-form");
 const formScreen = document.getElementById("form-screen");
@@ -15,6 +15,7 @@ let submissionStarted = false;
 let submissionTimeoutId = null;
 let activeTransport = null;
 let submittedAnswers = null;
+let submissionNonce = null;
 
 document.getElementById("report-date").value = new Date().toLocaleDateString("sv-SE", { timeZone: "Europe/Moscow" });
 
@@ -130,19 +131,16 @@ function sendToGoogle(answers) {
   transport.target = "google-form-target";
   transport.style.display = "none";
 
-  const [year, month, day] = answers.date.split("-");
-  addHiddenInput(transport, "entry.719482607_year", year);
-  addHiddenInput(transport, "entry.719482607_month", String(Number(month)));
-  addHiddenInput(transport, "entry.719482607_day", String(Number(day)));
-  addHiddenInput(transport, "entry.2136402635", answers.branch);
-  addHiddenInput(transport, "entry.1409369550", answers.administrator);
-  addHiddenInput(transport, "entry.532223289", answers.cash);
-  addHiddenInput(transport, "entry.758397248", answers.tbank);
-  addHiddenInput(transport, "entry.121576337", answers.ozonSveta);
-  addHiddenInput(transport, "entry.469702088", answers.ozonVeronika);
-  addHiddenInput(transport, "fvv", "1");
-  addHiddenInput(transport, "pageHistory", "0");
-  addHiddenInput(transport, "submissionTimestamp", "-1");
+  submissionNonce = window.crypto?.randomUUID?.() || `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+  addHiddenInput(transport, "formType", "morning");
+  addHiddenInput(transport, "nonce", submissionNonce);
+  addHiddenInput(transport, "reportDate", answers.date);
+  addHiddenInput(transport, "branch", answers.branch);
+  addHiddenInput(transport, "administrator", answers.administrator);
+  addHiddenInput(transport, "cash", answers.cash);
+  addHiddenInput(transport, "tbank", answers.tbank);
+  addHiddenInput(transport, "ozonSveta", answers.ozonSveta);
+  addHiddenInput(transport, "ozonVeronika", answers.ozonVeronika);
 
   document.body.appendChild(transport);
   activeTransport = transport;
@@ -156,10 +154,10 @@ function sendToGoogle(answers) {
     activeTransport = null;
     submitButton.disabled = false;
     submitButton.textContent = "Отправить отчёт";
+    errorMessage.textContent = "Сервер не подтвердил сохранение. Данные не считаются отправленными — попробуйте ещё раз.";
     errorMessage.classList.remove("is-hidden");
   }, 25000);
 }
-
 morningForm.addEventListener("submit", (event) => {
   event.preventDefault();
   errorMessage.classList.add("is-hidden");
@@ -189,18 +187,33 @@ morningForm.addEventListener("change", (event) => {
 morningForm.addEventListener("invalid", (event) => event.preventDefault(), true);
 updateFormStatus();
 
-targetFrame.addEventListener("load", () => {
+window.addEventListener("message", (event) => {
+  const trustedOrigin =
+    event.origin === "https://script.google.com" ||
+    event.origin === "https://script.googleusercontent.com" ||
+    /^https:\/\/[a-z0-9-]+-script\.googleusercontent\.com$/.test(event.origin);
+  const result = event.data;
+  if (!trustedOrigin || !result || result.source !== "chaplin-morning" || result.nonce !== submissionNonce) return;
   if (!submissionStarted || !submittedAnswers) return;
+
   submissionStarted = false;
   if (submissionTimeoutId) window.clearTimeout(submissionTimeoutId);
   activeTransport?.remove();
   activeTransport = null;
+
+  if (result.status !== "ok") {
+    submitButton.disabled = false;
+    submitButton.textContent = "Отправить отчёт";
+    errorMessage.textContent = result.message || "Отчёт не сохранился. Попробуйте ещё раз.";
+    errorMessage.classList.remove("is-hidden");
+    return;
+  }
+
   document.getElementById("report-preview").textContent = buildReport(submittedAnswers);
   formScreen.classList.add("is-hidden");
   successScreen.classList.remove("is-hidden");
   window.scrollTo({ top: 0, behavior: "smooth" });
 });
-
 function buildReport(answers) {
   return [
     "CHAPLIN — УТРЕННИЙ ОТЧЁТ",
