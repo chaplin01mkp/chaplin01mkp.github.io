@@ -138,6 +138,7 @@ let submittedAnswers = null;
 let benefitCounter = 0;
 let activeTransport = null;
 let submissionTimeoutId = null;
+let submissionNonce = null;
 
 const now = new Date();
 const localDate = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
@@ -622,6 +623,10 @@ function addHiddenInput(form, name, value) {
 }
 
 function sendToGoogle(answers) {
+  submissionNonce = submissionNonce || (
+    globalThis.crypto?.randomUUID?.() ||
+    `closing-${Date.now()}-${Math.random().toString(36).slice(2)}`
+  );
   const transport = document.createElement("form");
   transport.method = "POST";
   transport.action = FORM_ENDPOINT;
@@ -638,6 +643,8 @@ function sendToGoogle(answers) {
     addHiddenInput(transport, `entry.${entryId}`, value);
   }
   answers.cards.forEach((card) => addHiddenInput(transport, "entry.69256334", card));
+  addHiddenInput(transport, "formType", "closing");
+  addHiddenInput(transport, "nonce", submissionNonce);
   addHiddenInput(transport, "email", answers.email);
   addHiddenInput(transport, "certificatePayment", answers.certificatePayment);
   addHiddenInput(transport, "entry.1591994395", answers.administrator === "Светлана" ? "Да" : "Нет");
@@ -657,7 +664,7 @@ function sendToGoogle(answers) {
     activeTransport = null;
     submitButton.disabled = false;
     submitButton.textContent = "Отправить отчёт";
-    errorMessage.textContent = "Google не подтвердил отправку. Проверьте интернет и попробуйте ещё раз.";
+    errorMessage.textContent = "Сервер не подтвердил сохранение. Проверьте интернет и попробуйте ещё раз.";
     errorMessage.classList.remove("is-hidden");
   }, 25000);
 }
@@ -685,13 +692,28 @@ closingForm.addEventListener("submit", (event) => {
   sendToGoogle(submittedAnswers);
 });
 
-targetFrame.addEventListener("load", () => {
-  if (!submissionStarted || !submittedAnswers) return;
+window.addEventListener("message", (event) => {
+  const trustedOrigin =
+    event.origin === "https://script.google.com" ||
+    event.origin === "https://script.googleusercontent.com" ||
+    /^https:\/\/[a-z0-9-]+-script\.googleusercontent\.com$/.test(event.origin);
+  const data = event.data;
+  if (!trustedOrigin || !submissionStarted || !submittedAnswers) return;
+  if (!data || data.source !== "chaplin-closing" || data.nonce !== submissionNonce) return;
+
   submissionStarted = false;
   if (submissionTimeoutId) window.clearTimeout(submissionTimeoutId);
   submissionTimeoutId = null;
   activeTransport?.remove();
   activeTransport = null;
+
+  if (data.status !== "ok") {
+    submitButton.disabled = false;
+    submitButton.textContent = "Отправить отчёт";
+    errorMessage.textContent = data.message || "Отчёт не сохранился. Попробуйте ещё раз.";
+    errorMessage.classList.remove("is-hidden");
+    return;
+  }
   showSuccess(submittedAnswers);
 });
 
